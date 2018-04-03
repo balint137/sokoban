@@ -1,7 +1,7 @@
 package gui;
 
+import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -11,15 +11,13 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.table.TableColumnModel;
 
 import common.GameState;
 import common.IGameState;
@@ -41,20 +39,6 @@ public class GUI extends JFrame implements IGameState {
 		menuBar.add(menu);
 		setJMenuBar(menuBar);
 		
-		JPanel inputPanel = new JPanel();
-		JButton btn1 = new JButton("1");
-		JButton btn2 = new JButton("2");
-		JButton btn3 = new JButton("3");
-		JButton btn4 = new JButton("4");
-		inputPanel.setBounds(30, 30, 200, 200);
-		inputPanel.setBorder(BorderFactory.createTitledBorder("Input"));
-		inputPanel.setLayout(new GridLayout(2, 2, 0, 0));
-		inputPanel.add(btn1);
-		inputPanel.add(btn2);
-		inputPanel.add(btn3);
-		inputPanel.add(btn4);
-		add(inputPanel);
-		
 		BufferedImage myPicture = null;
 		try {
 			myPicture = ImageIO.read(new File("icon.png"));
@@ -62,17 +46,14 @@ public class GUI extends JFrame implements IGameState {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		JLabel picLabel = new JLabel(new ImageIcon(myPicture.getScaledInstance(100, 100, Image.SCALE_FAST)));
-		picLabel.setBounds(100, 300, 100, 100);
-		add(picLabel);
 		
-		Icon icon = new ImageIcon(myPicture);
+		Icon icon = new ImageIcon(myPicture.getScaledInstance(80, 80, Image.SCALE_FAST));
 		
-        String[] columnNames = {"Picture", "Description"};
+        String[] columnNames = {"1", "2", "3"};
         Object[][] data = {
-            {icon, "1"},
-            {icon, "2"},
-            {icon, "3"},
+            {icon, icon, icon},
+            {icon, icon, icon},
+            {icon, icon, icon},
         };
 		
 		JTable table = new JTable(data, columnNames) {
@@ -80,11 +61,19 @@ public class GUI extends JFrame implements IGameState {
                 return getValueAt(0, column).getClass();
             }
 		};
-		table.setPreferredScrollableViewportSize(table.getPreferredSize());
 		
-		JScrollPane scrollPane = new JScrollPane(table);
-		scrollPane.setBounds(250, 100, 200, 200);
-		add(scrollPane);
+		TableColumnModel columnModel = table.getColumnModel();
+		columnModel.getColumn(0).setPreferredWidth(80);
+		columnModel.getColumn(1).setPreferredWidth(80);		
+		columnModel.getColumn(2).setPreferredWidth(80);
+		table.setRowHeight(80);
+		table.setIntercellSpacing(new Dimension(0, 0));
+		
+		JPanel tablePanel = new JPanel();
+		tablePanel.add(table);
+		tablePanel.setBounds(100, 100, 300, 300);
+		tablePanel.setBorder(BorderFactory.createLineBorder(Color.BLUE));
+		add(tablePanel);
 		
 		setVisible(true);
 	}
