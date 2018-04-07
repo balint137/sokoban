@@ -160,13 +160,23 @@ public class GUI extends JFrame implements IGameState {
 	
 	public static void main(String[] args) {
 		GUI g = new GUI();
-		System.out.println("hello");
+		GameState gameState = new GameState();
+		g.onNewGameState(gameState);
 	}
 
 	@Override
 	public void onNewGameState(GameState g) {
-		// TODO Auto-generated method stub
-		
+		for (int row = 0; row < table.getRowCount(); row++) {
+			for (int col = 0; col < table.getColumnCount(); col++) {
+				switch (g.fields[row][col]) {
+				case PLAYER1: table.setValueAt(player, row, col); break;
+				case PLAYER2: table.setValueAt(player, row, col); break;
+				case WALL: table. setValueAt(wall, row, col); break;
+				case CRATE: table.setValueAt(crate, row, col); break;
+				case TARGET: table.setValueAt(target, row, col); break;
+				case GROUND: table.setValueAt(ground, row, col); break;
+				}
+			}
+		}
 	}
-
 }
