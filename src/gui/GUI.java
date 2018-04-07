@@ -25,8 +25,7 @@ import common.GameState;
 import common.IGameState;
 
 public class GUI extends JFrame implements IGameState {
-
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 7803853539866953138L;
 	
 	GUI() {
 		super("Sokoban");
