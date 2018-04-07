@@ -4,6 +4,8 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +22,7 @@ import javax.swing.JTable;
 import common.GameState;
 import common.IGameState;
 
-public class GUI extends JFrame implements IGameState {
+public class GUI extends JFrame implements IGameState, KeyListener {
 	private static final long serialVersionUID = 7803853539866953138L;
 	
 	private JTable table;
@@ -37,6 +39,8 @@ public class GUI extends JFrame implements IGameState {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setResizable(false);
 		setLayout(null);
+		setFocusable(true);
+		addKeyListener(this);
 		
 		JMenuBar menuBar = new JMenuBar();
 
@@ -138,6 +142,11 @@ public class GUI extends JFrame implements IGameState {
 			public Class<?> getColumnClass(int column) {
                 return getValueAt(0, column).getClass();
             }
+			
+	        public boolean isCellEditable(int row, int column) {                
+                return false;               
+	        };
+	        
 		};
 		table.setShowGrid(false);
 		table.setIntercellSpacing(new Dimension(0, 0));
@@ -174,5 +183,21 @@ public class GUI extends JFrame implements IGameState {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println(e.toString());
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
 	}
 }
