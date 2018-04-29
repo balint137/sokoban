@@ -1,5 +1,6 @@
 package gui;
 
+import common.DynamicField;
 import common.GameState;
 import common.IGameState;
 
@@ -21,6 +22,8 @@ import java.util.Map;
 public class GUI extends JFrame implements IGameState, KeyListener {
     private static final long serialVersionUID = 7803853539866953138L;
 
+    public static final int MAX_MAP_SIZE = 10;
+
     private GameState.FieldType[][] fields = new GameState.FieldType[10][10];
 
     private final BufferedImage crateImage;
@@ -31,7 +34,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
     private final int imageSize;
 
-    private ArrayList<dynamicElement> dynamicElements;
+    private ArrayList<DynamicFieldAnimation> dynamicFieldAnimations;
 
     private DrawPanel drawPanel;
 
@@ -99,12 +102,11 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-
+        System.out.println(e.toString());
     }
 
     @Override
@@ -119,31 +121,31 @@ public class GUI extends JFrame implements IGameState, KeyListener {
             super.paintComponent(g);
 
             //draw static
-            for (int row = 0; row < fields.length; row++) {
-                for (int col = 0; col < fields[row].length; col++) {
-                    g.drawImage(groundImage, col * imageSize, row * imageSize, null);
-                    g.drawImage(fieldToImage.get(fields[row][col]), col * imageSize, row * imageSize, null);
+            for (int col = 0; col < fields.length; col++) {
+                for (int row = 0; row < fields[col].length; row++) {
+                    g.drawImage(fieldToImage.get(GameState.FieldType.GROUND), col * imageSize, row * imageSize,
+                            null);
+                    g.drawImage(fieldToImage.get(fields[col][row]), col * imageSize, row * imageSize,
+                            null);
                 }
             }
 
             //draw dynamic
-            for (dynamicElement e : dynamicElements) {
-                g.drawImage(e.image, e.x - e.animX, e.y - e.animY, null);
+            for (DynamicFieldAnimation f : dynamicFieldAnimations) {
+                g.drawImage(fieldToImage.get(f.field.type), f.field.to.getX() * imageSize - f.dx,
+                        f.field.to.getY() * imageSize - f.dy, null);
             }
         }
     }
 
-    class dynamicElement {
-        public final BufferedImage image;
-        public int x, y;
-        public int animX, animY;
+    class DynamicFieldAnimation {
+        public DynamicField field;
+        public int dx, dy;
 
-        public dynamicElement(BufferedImage image, int x, int y, int animX, int animY) {
-            this.image = image;
-            this.x = x;
-            this.y = y;
-            this.animX = animX;
-            this.animY = animY;
+        public DynamicFieldAnimation(DynamicField field) {
+            this.field = field;
+            dx = (field.to.getX() - field.from.getX()) * imageSize;
+            dy = (field.to.getY() - field.from.getY()) * imageSize;
         }
     }
 
@@ -157,31 +159,28 @@ public class GUI extends JFrame implements IGameState, KeyListener {
     @Override
     public void onNewGameState(GameState g) {
         fields = g.fields;
-        dynamicElements = new ArrayList<>();
-
-        for (GameState.dynamicField f : g.dynamicFields) {
-            if (f.fromX == f.toX && f.fromY == f.toY) {
-                fields[f.fromX][f.fromY] = f.type;
-            } else {
-                dynamicElements.add(new dynamicElement(fieldToImage.get(f.type), f.toX * imageSize, f.toY * imageSize,
-                        (f.toX - f.fromX) * imageSize, (f.toY - f.fromY) * imageSize));
-            }
-        }
         repaint();
 
-        while (dynamicElements.isEmpty() == false) {
-            ListIterator<dynamicElement> iterator = dynamicElements.listIterator();
-            while (iterator.hasNext()) {
-                dynamicElement element = iterator.next();
-                if (element.animX > 0) {
-                    element.animX--;
-                } else if (element.animY > 0) {
-                    element.animY--;
+        dynamicFieldAnimations = new ArrayList<>();
+
+        for (DynamicField f : g.dynamicFields) {
+            dynamicFieldAnimations.add(new DynamicFieldAnimation(f));
+        }
+
+        while (!dynamicFieldAnimations.isEmpty()) {
+            ListIterator<DynamicFieldAnimation> itr = dynamicFieldAnimations.listIterator();
+            while (itr.hasNext()) {
+                DynamicFieldAnimation f = itr.next();
+                if (f.dx != 0) {
+                    f.dx = f.dx > 0 ? f.dx - 1 : f.dx + 1;
+                } else if (f.dy != 0) {
+                    f.dy = f.dy > 0 ? f.dy - 1 : f.dy + 1;
                 } else {
-                    iterator.remove();
+                    fields[f.field.to.getX()][f.field.to.getY()] = f.field.type;
+                    itr.remove();
                 }
                 try {
-                    Thread.sleep(5);
+                    Thread.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

@@ -5,51 +5,35 @@ import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static gui.GUI.MAX_MAP_SIZE;
+
 public class GameState implements Serializable {
 	private static final long serialVersionUID = 7413938669227547696L;
 
 	public enum FieldType { GROUND, WALL, PLAYER1, PLAYER2, CRATE, TARGET }
-	public FieldType[][] fields;
+	public FieldType[][] fields; //1. index: oszlop, 2. index: sor
+    public ArrayList<DynamicField> dynamicFields;
 
-	public class dynamicField {
-	    public FieldType type;
-	    public int fromX, fromY;
-	    public int toX, toY;
-
-        public dynamicField(FieldType type, int x, int y) {
-            this.type = type;
-            this.fromX = this.toX = x;
-            this.fromY = this.toY = y;
-        }
-
-        public dynamicField(FieldType type, int fromX, int fromY, int toX, int toY) {
-            this.type = type;
-            this.fromX = fromX;
-            this.fromY = fromY;
-            this.toX = toX;
-            this.toY = toY;
-        }
-    }
-
-    public ArrayList<dynamicField> dynamicFields = new ArrayList<dynamicField>();
 
 	public GameState() {
 		// palya rajzolas teszt
-		fields = new FieldType[10][10];
+		fields = new FieldType[MAX_MAP_SIZE][MAX_MAP_SIZE];
 		
 		for (FieldType[] row: fields) {
 			Arrays.fill(row, FieldType.GROUND);
 		}
 		
 		Arrays.fill(fields[1], FieldType.WALL);
-		Arrays.fill(fields[7], FieldType.WALL);
+		Arrays.fill(fields[8], FieldType.WALL);
 
+		fields[2][3] = FieldType.CRATE;
+		fields[3][3] = FieldType.CRATE;
+		fields[4][3] = FieldType.WALL;
 
-        dynamicFields.add(new dynamicField(FieldType.CRATE, 2, 3));
-        dynamicFields.add(new dynamicField(FieldType.CRATE, 3, 3));
-        dynamicFields.add(new dynamicField(FieldType.CRATE, 4, 5));
-        dynamicFields.add(new dynamicField(FieldType.CRATE, 5, 6));
-        dynamicFields.add(new dynamicField(FieldType.WALL, 3, 5));
-        dynamicFields.add(new dynamicField(FieldType.PLAYER1, 5, 2, 6, 2));
+		dynamicFields = new ArrayList<>();
+
+        dynamicFields.add(new DynamicField(FieldType.PLAYER1, new Coordinate(3, 4), new Coordinate(3, 5)));
+        dynamicFields.add(new DynamicField(FieldType.CRATE, new Coordinate(7, 2), new Coordinate(6, 2)));
+
 	}
 }
