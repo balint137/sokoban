@@ -15,7 +15,7 @@ public class Coordinate {
     }
 
     public void setX(int x) throws IllegalArgumentException {
-        if (x >= 0 && x < MAX_MAP_SIZE) {
+        if (x > -MAX_MAP_SIZE && x < MAX_MAP_SIZE) {
             this.x = x;
         } else {
             throw new IllegalArgumentException("Invalid coordinate");
@@ -27,10 +27,23 @@ public class Coordinate {
     }
 
     public void setY(int y) throws IllegalArgumentException {
-        if (y >= 0 && y < MAX_MAP_SIZE) {
+        if (y > -MAX_MAP_SIZE && y < MAX_MAP_SIZE) {
             this.y = y;
         } else {
             throw new IllegalArgumentException("Invalid coordinate");
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Coordinate{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
+    }
+
+    public void add(Coordinate other) {
+        setX(this.x + other.x);
+        setY(this.y + other.y);
     }
 }
