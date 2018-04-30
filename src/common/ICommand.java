@@ -1,5 +1,5 @@
 package common;
 
 public interface ICommand {
-	void onCommand(Command c);
+    void onCommand(Command c);
 }
