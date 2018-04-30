@@ -6,22 +6,11 @@ import common.ICommand;
 import common.IGameState;
 
 public class Network implements ICommand, IGameState {
+    @Override
+    public void onNewGameState(GameState g) {
+    }
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onNewGameState(GameState g) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onCommand(Command c) {
-		// TODO Auto-generated method stub
-		
-	}
-
+    @Override
+    public void onCommand(Command c) {
+    }
 }

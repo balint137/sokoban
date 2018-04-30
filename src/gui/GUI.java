@@ -1,203 +1,203 @@
 package gui;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import common.*;
+import common.GameState.FieldType;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-
-import javax.imageio.ImageIO;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import common.GameState;
-import common.IGameState;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Map;
 
 public class GUI extends JFrame implements IGameState, KeyListener {
-	private static final long serialVersionUID = 7803853539866953138L;
-	
-	private JTable table;
-	private JPanel tablePanel;
-	private Icon player;
-	private Icon wall;
-	private Icon crate;
-	private Icon target;
-	private Icon ground;
-	
-	GUI() {
-		super("Sokoban");
-		setSize(1000, 800);
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setResizable(false);
-		setLayout(null);
-		setFocusable(true);
-		addKeyListener(this);
-		
-		JMenuBar menuBar = new JMenuBar();
+    public static final int MAX_MAP_SIZE = 10;
 
-		JMenu menu = new JMenu("Start");
+    private int imageSize;
+    private Map<FieldType, BufferedImage> fieldToImage = new EnumMap<>(FieldType.class);
 
-		JMenuItem menuItem = new JMenuItem("Client");
-		menuItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		menu.add(menuItem);
+    private FieldType[][] fields;
+    private ArrayList<DynamicFieldAnimation> dynamicFieldAnimations;
 
-		menuItem = new JMenuItem("Server");
-		menuItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		menu.add(menuItem);
-		menuBar.add(menu);
-		
-		menuItem = new JMenuItem("Exit");
-		menuItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.exit(0);
-			}
-		});
-		menuBar.add(menuItem);
+    private ICommand logic;
 
-		setJMenuBar(menuBar);
-		
-		BufferedImage groundImage = null;
-		try {
-			groundImage = ImageIO.read(new File("resources/ground.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		BufferedImage playerImage = null;
-		try {
-			playerImage = ImageIO.read(new File("resources/player.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		BufferedImage wallImage = null;
-		try {
-			wallImage = ImageIO.read(new File("resources/wall.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		BufferedImage crateImage = null;
-		try {
-			crateImage = ImageIO.read(new File("resources/crate.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		BufferedImage targetImage = null;
-		try {
-			targetImage = ImageIO.read(new File("resources/target.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		BufferedImage combined = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
-		Graphics graphics = combined.getGraphics();
-		graphics.drawImage(groundImage, 0, 0, null);
-		graphics.drawImage(playerImage, 0, 0, null);
-		player = new ImageIcon(combined);
-		
-		combined = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
-		graphics = combined.getGraphics();
-		graphics.drawImage(groundImage, 0, 0, null);
-		graphics.drawImage(wallImage, 0, 0, null);
-		wall = new ImageIcon(combined);
-		
-		combined = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
-		graphics = combined.getGraphics();
-		graphics.drawImage(groundImage, 0, 0, null);
-		graphics.drawImage(crateImage, 0, 0, null);
-		crate = new ImageIcon(combined);
-		
-		combined = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
-		graphics = combined.getGraphics();
-		graphics.drawImage(groundImage, 0, 0, null);
-		graphics.drawImage(targetImage, 0, 0, null);
-		target = new ImageIcon(combined);
-		
-		ground = new ImageIcon(groundImage);
-		
-		table = new JTable(10, 10) {
-			private static final long serialVersionUID = -4882552328598802471L;
+    public GUI() throws IOException {
+        super("Sokoban");
+        setSize(850, 750);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
+        setLayout(new BorderLayout());
+        setFocusable(true);
+        addKeyListener(this);
 
-			@Override
-			public Class<?> getColumnClass(int column) {
-                return getValueAt(0, column).getClass();
+        fields = new FieldType[MAX_MAP_SIZE][MAX_MAP_SIZE];
+        dynamicFieldAnimations = new ArrayList<>();
+
+        BuildMenu();
+        ReadResourceImages();
+
+        DrawPanel drawPanel = new DrawPanel();
+        add(drawPanel, BorderLayout.CENTER);
+
+        JPanel statusPanel = new JPanel();
+        statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        add(statusPanel, BorderLayout.SOUTH);
+        statusPanel.setPreferredSize(new Dimension(getWidth(), 40));
+        statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
+        JLabel statusLabel = new JLabel("Status bar");
+        statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        statusPanel.add(statusLabel);
+
+        setVisible(true);
+    }
+
+    public void setLogic(ICommand l) {
+        this.logic = l;
+    }
+
+    private void ReadResourceImages() throws IOException {
+        final BufferedImage crateImage = ImageIO.read(new File("resources/crate.png"));
+        final BufferedImage groundImage = ImageIO.read(new File("resources/ground.png"));
+        final BufferedImage playerImage = ImageIO.read(new File("resources/player.png"));
+        final BufferedImage targetImage = ImageIO.read(new File("resources/target.png"));
+        final BufferedImage wallImage = ImageIO.read(new File("resources/wall.png"));
+
+        fieldToImage.put(FieldType.CRATE, crateImage);
+        fieldToImage.put(FieldType.GROUND, groundImage);
+        fieldToImage.put(FieldType.PLAYER1, playerImage);
+        fieldToImage.put(FieldType.TARGET, targetImage);
+        fieldToImage.put(FieldType.WALL, wallImage);
+
+        imageSize = groundImage.getWidth();
+    }
+
+    private void BuildMenu() {
+        JMenuBar menuBar = new JMenuBar();
+
+        JMenu menu = new JMenu("Start");
+
+        JMenuItem menuItem = new JMenuItem("Client");
+        menuItem.addActionListener(e -> {
+        });
+        menu.add(menuItem);
+
+        menuItem = new JMenuItem("Server");
+        menuItem.addActionListener(e -> {
+            final JFileChooser fileChooser = new JFileChooser();
+            fileChooser.showOpenDialog(null);
+        });
+        menu.add(menuItem);
+
+        menuItem = new JMenuItem("Local");
+        menuItem.addActionListener(e -> {
+        });
+        menu.add(menuItem);
+
+        menuItem = new JMenuItem("Local multiplayer");
+        menuItem.addActionListener(e -> {
+        });
+        menu.add(menuItem);
+
+        menuBar.add(menu);
+
+        menuItem = new JMenuItem("Exit");
+        menuItem.addActionListener(e -> System.exit(0));
+        menuBar.add(menuItem);
+
+        setJMenuBar(menuBar);
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        logic.onCommand(new Command(Command.CommandType.KEY_PRESSED, e));
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+    }
+
+    @Override
+    public void onNewGameState(GameState g) {
+        switch (g.type) {
+            case STATIC_FIELDS:
+                fields = g.staticFields;
+                break;
+            case DYNAMIC_FIELDS:
+                dynamicFieldAnimations.clear();
+                for (DynamicField f : g.dynamicFields) {
+                    dynamicFieldAnimations.add(new DynamicFieldAnimation(f));
+                }
+
+                boolean inProgress = true;
+                while (inProgress) {
+                    inProgress = false;
+                    for (DynamicFieldAnimation f : dynamicFieldAnimations) {
+                        if (f.dx != 0) {
+                            inProgress = true;
+                            f.dx = f.dx > 0 ? f.dx - 4 : f.dx + 4;
+                        } else if (f.dy != 0) {
+                            inProgress = true;
+                            f.dy = f.dy > 0 ? f.dy - 4 : f.dy + 4;
+                        }
+                        try {
+                            Thread.sleep(1);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        this.repaint();
+                    }
+                }
+                break;
+            case TIME:
+            case MOVEMENTS:
+                break;
+        }
+        Thread.currentThread().interrupt();
+    }
+
+    class DrawPanel extends JPanel {
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+
+            //draw static
+            for (int col = 0; col < fields.length; col++) {
+                for (int row = 0; row < fields[col].length; row++) {
+                    g.drawImage(fieldToImage.get(FieldType.GROUND), col * imageSize, row * imageSize,
+                            null);
+                    g.drawImage(fieldToImage.get(fields[col][row]), col * imageSize, row * imageSize,
+                            null);
+                }
             }
-			
-	        public boolean isCellEditable(int row, int column) {                
-                return false;               
-	        };
-	        
-		};
-		table.setShowGrid(false);
-		table.setIntercellSpacing(new Dimension(0, 0));
-		table.setRowHeight(64);
-		for (int i = 0; i < table.getColumnCount(); i++) {
-			table.getColumnModel().getColumn(i).setPreferredWidth(64);
-		}
-		
-		tablePanel = new JPanel();
-		tablePanel.add(table);
-		tablePanel.setBounds(50, 50, 700, 700);
-		add(tablePanel);
-		
-		setVisible(true);
-	}
-	
-	public static void main(String[] args) {
-		GUI g = new GUI();
-		GameState gameState = new GameState();
-		g.onNewGameState(gameState);
-	}
 
-	@Override
-	public void onNewGameState(GameState g) {
-		for (int row = 0; row < table.getRowCount(); row++) {
-			for (int col = 0; col < table.getColumnCount(); col++) {
-				switch (g.fields[row][col]) {
-				case PLAYER1: table.setValueAt(player, row, col); break;
-				case PLAYER2: table.setValueAt(player, row, col); break;
-				case WALL: table. setValueAt(wall, row, col); break;
-				case CRATE: table.setValueAt(crate, row, col); break;
-				case TARGET: table.setValueAt(target, row, col); break;
-				case GROUND: table.setValueAt(ground, row, col); break;
-				}
-			}
-		}
-	}
+            //draw dynamic
+            for (DynamicFieldAnimation f : dynamicFieldAnimations) {
+                g.drawImage(fieldToImage.get(f.type), f.x - f.dx, f.y - f.dy, null);
+            }
+        }
+    }
 
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-	}
+    class DynamicFieldAnimation {
+        GameState.FieldType type;
+        int x, y;
+        int dx, dy;
 
-	@Override
-	public void keyPressed(KeyEvent e) {
-		// TODO Auto-generated method stub
-		System.out.println(e.toString());
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-		// TODO Auto-generated method stub
-	}
+        DynamicFieldAnimation(DynamicField field) {
+            type = field.type;
+            x = (field.actual.getX() + field.delta.getX()) * imageSize;
+            y = (field.actual.getY() + field.delta.getY()) * imageSize;
+            dx = field.delta.getX() * imageSize;
+            dy = field.delta.getY() * imageSize;
+        }
+    }
 }

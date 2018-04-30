@@ -1,30 +1,24 @@
 package common;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.ArrayList;
 
 public class GameState implements Serializable {
-	private static final long serialVersionUID = 7413938669227547696L;
+    public GameStateType type;
+    public FieldType[][] staticFields; //1. index: oszlop, 2. index: sor
+    public ArrayList<DynamicField> dynamicFields;
+    public int elapsedTime;
+    public int numberOfMovements;
 
-	public enum FieldType { GROUND, WALL, PLAYER1, PLAYER2, CRATE, TARGET }
-	public FieldType[][] fields;
-	
-	public GameState() {
-		// palya rajzolas teszt
-		fields = new FieldType[10][10];
-		
-		for (FieldType[] row: fields) {
-			Arrays.fill(row, FieldType.GROUND);
-		}
-		
-		Arrays.fill(fields[1], FieldType.WALL);
-		Arrays.fill(fields[7], FieldType.WALL);
-		fields[2][3] = FieldType.CRATE;
-		fields[3][3] = FieldType.CRATE;
-		fields[5][7] = FieldType.CRATE;
-		fields[4][8] = FieldType.WALL;
-		fields[4][7] = FieldType.WALL;
-		fields[2][6] = FieldType.TARGET;
-		fields[5][5] = FieldType.PLAYER1;
-	}
+    public GameState(GameStateType type, FieldType[][] staticFields, ArrayList<DynamicField> dynamicFields, int elapsedTime, int numberOfMovements) {
+        this.type = type;
+        this.staticFields = staticFields;
+        this.dynamicFields = dynamicFields;
+        this.elapsedTime = elapsedTime;
+        this.numberOfMovements = numberOfMovements;
+    }
+
+    public enum FieldType {GROUND, WALL, PLAYER1, PLAYER2, CRATE, TARGET}
+
+    public enum GameStateType {STATIC_FIELDS, DYNAMIC_FIELDS, TIME, MOVEMENTS}
 }
