@@ -112,6 +112,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
         menuItem = new JMenuItem("Local");
         menuItem.addActionListener(e -> {
+            logic.onCommand(new Command(Command.CommandType.OPEN_MAP_FILE, "resources/map.txt"));
         });
         menu.add(menuItem);
 
