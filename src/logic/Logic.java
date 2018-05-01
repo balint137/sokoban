@@ -2,7 +2,6 @@ package logic;
 
 import common.*;
 import common.GameState.FieldType;
-import gui.GUI;
 
 import java.io.*;
 import java.util.*;
@@ -14,20 +13,18 @@ import static gui.GUI.MAX_MAP_SIZE;
 public class Logic implements ICommand {
     private IGameState g;
     private boolean animationInProgress;
-    
+
     private Coordinate player;
-    
+
     private FieldType[][] mapStatic;
     private ArrayList<DynamicField> crates;
     private ArrayList<DynamicField> players;
     private ArrayList<DynamicField> mapDynamic;
-    
+
     private ArrayList<Command> newCommands;
     private ArrayList<Command> commandsToExecute;
 
-    public Logic(IGameState g) {
-        this.g = g;
-        
+    public Logic() {
         newCommands = new ArrayList<>();
         animationInProgress = false;
         mapStatic = new FieldType[MAX_MAP_SIZE][MAX_MAP_SIZE];
@@ -36,14 +33,14 @@ public class Logic implements ICommand {
         mapDynamic = new ArrayList<>();
     }
 
+    public void setGui(IGameState g) {
+        this.g = g;
+    }
+
     public static void main(String[] args) throws IOException {
-        GUI g = new GUI();
-        Logic l = new Logic(g);
-        g.setLogic(l);
-        
         l.loadMap("resources/map.txt");
         g.onNewGameState(new GameState(GameState.GameStateType.STATIC_FIELDS, l.mapStatic, null, 0, 0));
-        
+
         g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, null, l.mapDynamic, 0, 0));
         l.mapDynamic.clear();
         //---------------------------------------------------------------------
@@ -54,12 +51,12 @@ public class Logic implements ICommand {
     	newCommands.add(c);
     	System.out.println("pfff");
     }
-    
+
     private void loadMap(String filename) throws IOException {
     	for (FieldType[] col : this.mapStatic) {
             Arrays.fill(col, FieldType.GROUND);
         }
-        
+
         File map = new File(filename);
         Charset encoding = Charset.defaultCharset();
         try (InputStream in = new FileInputStream(map);
