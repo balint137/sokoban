@@ -17,35 +17,16 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
 
-import static javax.swing.SwingUtilities.isEventDispatchThread;
-
 public class GUI extends JFrame implements IGameState, KeyListener {
     public static final int MAX_MAP_SIZE = 10;
-
+    boolean animationInProgress;
     private int imageSize;
-    private Map<FieldType, BufferedImage> fieldToImage = new EnumMap<>(FieldType.class);
-
+    private Map<FieldType, BufferedImage> fieldToImage;
     private FieldType[][] fields;
     private ArrayList<DynamicFieldAnimation> dynamicFieldAnimations;
-
     private ICommand logic;
 
-    public static void main(String[] args) throws IOException {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                Logic l = new Logic();
-                try {
-                    GUI g = new GUI(l);
-                    l.setGui(g);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
-    public GUI(ICommand logic) throws IOException {
+    public GUI() throws IOException {
         super("Sokoban");
         setSize(850, 750);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -54,10 +35,10 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         setFocusable(true);
         addKeyListener(this);
 
-        this.logic = logic;
-
+        fieldToImage = new EnumMap<>(FieldType.class);
         fields = new FieldType[MAX_MAP_SIZE][MAX_MAP_SIZE];
         dynamicFieldAnimations = new ArrayList<>();
+        animationInProgress = false;
 
         BuildMenu();
         ReadResourceImages();
@@ -75,6 +56,18 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         statusPanel.add(statusLabel);
 
         setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                final GUI g = new GUI();
+                Timer timer = new Timer(10, e -> g.refreshAnimations());
+                timer.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void ReadResourceImages() throws IOException {
@@ -112,7 +105,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
         menuItem = new JMenuItem("Local");
         menuItem.addActionListener(e -> {
-            logic.onCommand(new Command(Command.CommandType.OPEN_MAP_FILE, "resources/map.txt"));
+            this.logic = new Logic(this, "resources/map.txt", false);
         });
         menu.add(menuItem);
 
@@ -145,6 +138,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
     @Override
     public void onNewGameState(GameState g) {
+        System.out.println("New gamestate received");
         switch (g.type) {
             case STATIC_FIELDS:
                 fields = g.staticFields;
@@ -154,32 +148,34 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 for (DynamicField f : g.dynamicFields) {
                     dynamicFieldAnimations.add(new DynamicFieldAnimation(f));
                 }
-
-                boolean inProgress = true;
-                while (inProgress) {
-                    inProgress = false;
-                    for (DynamicFieldAnimation f : dynamicFieldAnimations) {
-                        if (f.dx != 0) {
-                            inProgress = true;
-                            f.dx = f.dx > 0 ? f.dx - 4 : f.dx + 4;
-                        } else if (f.dy != 0) {
-                            inProgress = true;
-                            f.dy = f.dy > 0 ? f.dy - 4 : f.dy + 4;
-                        }
-                        try {
-                            Thread.sleep(1);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        this.repaint();
-                    }
-                }
+                animationInProgress = true;
                 break;
             case TIME:
             case MOVEMENTS:
                 break;
         }
-        Thread.currentThread().interrupt();
+    }
+
+    private void refreshAnimations() {
+        if (animationInProgress) {
+            animationInProgress = false;
+            for (DynamicFieldAnimation f : dynamicFieldAnimations) {
+                if (f.dx != 0) {
+                    animationInProgress = true;
+                    f.dx = f.dx > 0 ? f.dx - 8 : f.dx + 8;
+                } else if (f.dy != 0) {
+                    animationInProgress = true;
+                    f.dy = f.dy > 0 ? f.dy - 8 : f.dy + 8;
+                }
+            }
+            repaint();
+
+            //amikor utoljara fut le
+            if (!animationInProgress) {
+                logic.onCommand(new Command(Command.CommandType.ANIMATION_DONE));
+                System.out.println("Animation done");
+            }
+        }
     }
 
     class DrawPanel extends JPanel {
