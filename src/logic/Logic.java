@@ -1,3 +1,4 @@
+
 package logic;
 
 import common.*;
@@ -27,7 +28,7 @@ public class Logic implements ICommand {
     private TimerTask wakeUp;
     private long delay;
 
-    public Logic() {
+    public Logic(){
         
         newCommands = new ArrayList<>();
         commandsToExecute = new ArrayList<>();
@@ -49,7 +50,7 @@ public class Logic implements ICommand {
     	newCommands.add(c);
     	executeCommands();
     }
-    
+
     private void loadMap(String filename) throws IOException {
     	for (FieldType[] col : this.mapStatic) {
             Arrays.fill(col, FieldType.GROUND);
@@ -104,6 +105,12 @@ public class Logic implements ICommand {
     		case NEW_GAME:
     			break;
     		case OPEN_MAP_FILE:
+    			try {
+					loadMap(c.mapFilePath);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
     			break;
     		case KEY_PRESSED:
     			switch (c.lastKeyPressed.getKeyChar()) {

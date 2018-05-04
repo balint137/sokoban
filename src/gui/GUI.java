@@ -2,6 +2,7 @@ package gui;
 
 import common.*;
 import common.GameState.FieldType;
+import logic.Logic;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
 
+import static javax.swing.SwingUtilities.isEventDispatchThread;
+
 public class GUI extends JFrame implements IGameState, KeyListener {
     public static final int MAX_MAP_SIZE = 10;
 
@@ -27,7 +30,22 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
     private ICommand logic;
 
-    public GUI() throws IOException {
+    public static void main(String[] args) throws IOException {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Logic l = new Logic();
+                try {
+                    GUI g = new GUI(l);
+                    l.setGui(g);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public GUI(ICommand logic) throws IOException {
         super("Sokoban");
         setSize(850, 750);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -35,6 +53,8 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         setLayout(new BorderLayout());
         setFocusable(true);
         addKeyListener(this);
+
+        this.logic = logic;
 
         fields = new FieldType[MAX_MAP_SIZE][MAX_MAP_SIZE];
         dynamicFieldAnimations = new ArrayList<>();
@@ -55,10 +75,6 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         statusPanel.add(statusLabel);
 
         setVisible(true);
-    }
-
-    public void setLogic(ICommand l) {
-        this.logic = l;
     }
 
     private void ReadResourceImages() throws IOException {
@@ -96,6 +112,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
         menuItem = new JMenuItem("Local");
         menuItem.addActionListener(e -> {
+            logic.onCommand(new Command(Command.CommandType.OPEN_MAP_FILE, "resources/map.txt"));
         });
         menu.add(menuItem);
 

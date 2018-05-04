@@ -13,6 +13,11 @@ public class Command implements Serializable {
         this.lastKeyPressed = lastKeyPressed;
     }
 
+    public Command(CommandType command, String mapFilePath) {
+        this.command = command;
+        this.mapFilePath = mapFilePath;
+    }
+
     public enum CommandType {
         OPEN_MAP_FILE, NEW_GAME, KEY_PRESSED
     }
