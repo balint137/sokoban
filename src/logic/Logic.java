@@ -111,12 +111,8 @@ public class Logic implements ICommand {
     		case OPEN_MAP_FILE:
     			break;
     		case KEY_PRESSED:
-    			processKeyPress(c);
-    	    	mapDynamic.addAll(players);
-    	    	mapDynamic.addAll(crates);
     	    	if(!animationInProgress) {
-    	    		animationInProgress = true;
-    				g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, GameState.GamePhase.GAME, null, mapDynamic, 0, 0));
+	    			processKeyPress(c);
     	    	}
     			break;
     		case ANIMATION_DONE:
@@ -140,178 +136,66 @@ public class Logic implements ICommand {
     private void processKeyPress(Command c) {
     	switch (c.lastKeyPressed.getKeyChar()) {
 		case 'w':
-			moveUp(0);
+			move(0, new Coordinate(0,-1));
 			break;
 		case 'a':
-			moveLeft(0);
+			move(0, new Coordinate(-1, 0));
 			break;
 		case 's':
-			moveDown(0);
+			move(0, new Coordinate(0,1));
 			break;
 		case 'd':
-			moveRight(0);
+			move(0, new Coordinate(1, 0));
 			break;
 		}
     }
     
-    private void moveUp(int playerIndex) {
-    	switch(blockType(players.get(playerIndex).actual, new Coordinate(0, -1))) {
-    	case WALL:
-    		return;
+    private void move(int playerIndex, Coordinate dir) {
+    	switch(blockType(players.get(playerIndex).actual, dir)) {
     	case GROUND:
-    		players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (0, -1)));
-    		return;
+    		players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, dir));
+    		break;
     	case TARGET:
-    		players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (0, -1)));
-    		return;
+    		players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, dir));
+    		break;
     	case CRATE:
-    		int crateIndex;
-    		switch(blockType(players.get(playerIndex).actual, new Coordinate(0, -2))) {
-    		case GROUND:
-    			players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (0, -1)));
-    			crateIndex = findCrateIndex(players.get(playerIndex).actual, new Coordinate(0, -1));
-    			crates.set(crateIndex, new DynamicField(FieldType.CRATE, crates.get(crateIndex).actual, new Coordinate (0, -1)));
-    			return;
-    		case TARGET:
-    			players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (0, -1)));
-    			crateIndex = findCrateIndex(players.get(playerIndex).actual, new Coordinate(0, -1));
-    			crates.set(crateIndex, new DynamicField(FieldType.CRATE, crates.get(crateIndex).actual, new Coordinate (0, -1)));
-    			return;
-    		case CRATE:
-        		return;
-    		case PLAYER1:
-        		return;
-        	case PLAYER2:
-        		return;
-        	case WALL:
-        		return;
-    		}
-    		return;
+    		moveCrate(playerIndex, dir);
+    		break;
     	case PLAYER1:
-    		return;
+    		break;
     	case PLAYER2:
-    		return;
-    	}
-    }
-
-    private void moveDown(int playerIndex) {
-    	switch(blockType(players.get(playerIndex).actual, new Coordinate(0, 1))) {
+    		break;
     	case WALL:
-    		return;
-    	case GROUND:
-    		players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (0, 1)));
-    		return;
-    	case TARGET:
-    		players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (0, 1)));
-    		return;
-    	case CRATE:
-    		int crateIndex;
-    		switch(blockType(players.get(playerIndex).actual, new Coordinate(0, 2))) {
-    		case GROUND:
-    			players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (0, 1)));
-    			crateIndex = findCrateIndex(players.get(playerIndex).actual, new Coordinate(0, 1));
-    			crates.set(crateIndex, new DynamicField(FieldType.CRATE, crates.get(crateIndex).actual, new Coordinate (0, 1)));
-    			return;
-    		case TARGET:
-    			players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (0, 1)));
-    			crateIndex = findCrateIndex(players.get(playerIndex).actual, new Coordinate(0, 1));
-    			crates.set(crateIndex, new DynamicField(FieldType.CRATE, crates.get(crateIndex).actual, new Coordinate (0, 1)));
-    			return;
-    		case CRATE:
-        		return;
-    		case PLAYER1:
-        		return;
-        	case PLAYER2:
-        		return;
-        	case WALL:
-        		return;
-    		}
-    		return;
-    	case PLAYER1:
-    		return;
-    	case PLAYER2:
-    		return;
+    		break;
     	}
+    	mapDynamic.addAll(players);
+    	mapDynamic.addAll(crates);
+		animationInProgress = true;
+		g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, GameState.GamePhase.GAME, null, mapDynamic, 0, 0));
     }
     
-    private void moveLeft(int playerIndex) {
-    	switch(blockType(players.get(playerIndex).actual, new Coordinate(-1, 0))) {
-    	case WALL:
+    private void moveCrate(int playerIndex, Coordinate dir) {
+		int crateIndex;
+		switch(blockType(players.get(playerIndex).actual, new Coordinate(dir.getX()*2, dir.getY()*2))) {
+		case GROUND:
+			players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, dir));
+			crateIndex = findCrateIndex(players.get(playerIndex).actual, dir);
+			crates.set(crateIndex, new DynamicField(FieldType.CRATE, crates.get(crateIndex).actual, dir));
+			return;
+		case TARGET:
+			players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, dir));
+			crateIndex = findCrateIndex(players.get(playerIndex).actual, dir);
+			crates.set(crateIndex, new DynamicField(FieldType.CRATE, crates.get(crateIndex).actual, dir));
+			return;
+		case CRATE:
     		return;
-    	case GROUND:
-    		players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (-1, 0)));
-    		return;
-    	case TARGET:
-    		players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (-1, 0)));
-    		return;
-    	case CRATE:
-    		int crateIndex;
-    		switch(blockType(players.get(playerIndex).actual, new Coordinate(-2, 0))) {
-    		case GROUND:
-    			players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (-1, 0)));
-    			crateIndex = findCrateIndex(players.get(playerIndex).actual, new Coordinate(-1, 0));
-    			crates.set(crateIndex, new DynamicField(FieldType.CRATE, crates.get(crateIndex).actual, new Coordinate (-1, 0)));
-    			return;
-    		case TARGET:
-    			players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (-1, 0)));
-    			crateIndex = findCrateIndex(players.get(playerIndex).actual, new Coordinate(-1, 0));
-    			crates.set(crateIndex, new DynamicField(FieldType.CRATE, crates.get(crateIndex).actual, new Coordinate (-1, 0)));
-    			return;
-    		case CRATE:
-        		return;
-    		case PLAYER1:
-        		return;
-        	case PLAYER2:
-        		return;
-        	case WALL:
-        		return;
-    		}
-    		return;
-    	case PLAYER1:
-    		return;
-    	case PLAYER2:
-    		return;
-    	}
-    }
-    
-    private void moveRight(int playerIndex) {
-    	switch(blockType(players.get(playerIndex).actual, new Coordinate(1, 0))) {
-    	case GROUND:
-    		players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (1, 0)));
-    		return;
-    	case TARGET:
-    		players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (1, 0)));
-    		return;
-    	case CRATE:
-    		int crateIndex;
-    		switch(blockType(players.get(playerIndex).actual, new Coordinate(2, 0))) {
-    		case GROUND:
-    			players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (1, 0)));
-    			crateIndex = findCrateIndex(players.get(playerIndex).actual, new Coordinate(1, 0));
-    			crates.set(crateIndex, new DynamicField(FieldType.CRATE, crates.get(crateIndex).actual, new Coordinate (1, 0)));
-    			return;
-    		case TARGET:
-    			players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, new Coordinate (1, 0)));
-    			crateIndex = findCrateIndex(players.get(playerIndex).actual, new Coordinate(1, 0));
-    			crates.set(crateIndex, new DynamicField(FieldType.CRATE, crates.get(crateIndex).actual, new Coordinate (1, 0)));
-    			return;
-    		case CRATE:
-        		return;
-    		case PLAYER1:
-        		return;
-        	case PLAYER2:
-        		return;
-        	case WALL:
-        		return;
-    		}
-    		return;
-    	case PLAYER1:
+		case PLAYER1:
     		return;
     	case PLAYER2:
     		return;
     	case WALL:
     		return;
-    	}
+		}
     }
     
     private FieldType blockType (Coordinate c, Coordinate difference) {
