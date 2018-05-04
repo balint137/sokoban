@@ -18,7 +18,11 @@ public class Command implements Serializable {
         this.mapFilePath = mapFilePath;
     }
 
+    public Command(CommandType command) {
+        this.command = command;
+    }
+
     public enum CommandType {
-        OPEN_MAP_FILE, NEW_GAME, KEY_PRESSED
+        OPEN_MAP_FILE, NEW_GAME, KEY_PRESSED, ANIMATION_DONE
     }
 }
