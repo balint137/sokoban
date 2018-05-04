@@ -107,6 +107,9 @@ public class Logic implements ICommand {
     		case OPEN_MAP_FILE:
     			try {
 					loadMap(c.mapFilePath);
+					g.onNewGameState(new GameState(GameState.GameStateType.STATIC_FIELDS, mapStatic, null, 0, 0));
+					g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, null, mapDynamic, 0, 0));
+					mapDynamic.clear();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
