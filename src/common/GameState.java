@@ -9,16 +9,20 @@ public class GameState implements Serializable {
     public ArrayList<DynamicField> dynamicFields;
     public int elapsedTime;
     public int numberOfMovements;
+    public GamePhase phase;
 
-    public GameState(GameStateType type, FieldType[][] staticFields, ArrayList<DynamicField> dynamicFields, int elapsedTime, int numberOfMovements) {
+    public GameState(GameStateType type, GamePhase phase, FieldType[][] staticFields, ArrayList<DynamicField> dynamicFields, int elapsedTime, int numberOfMovements) {
         this.type = type;
         this.staticFields = staticFields;
         this.dynamicFields = dynamicFields;
         this.elapsedTime = elapsedTime;
         this.numberOfMovements = numberOfMovements;
+        this.phase = phase;
     }
 
     public enum FieldType {GROUND, WALL, PLAYER1, PLAYER2, CRATE, TARGET}
 
-    public enum GameStateType {STATIC_FIELDS, DYNAMIC_FIELDS, TIME, MOVEMENTS}
+    public enum GameStateType {STATIC_FIELDS, DYNAMIC_FIELDS, TIME, MOVEMENTS, PHASE_UPDATE}
+    
+    public enum GamePhase {GAME, WIN, LOSE}
 }

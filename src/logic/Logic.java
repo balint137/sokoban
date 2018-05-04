@@ -23,28 +23,34 @@ public class Logic implements ICommand {
     
     private ArrayList<Command> newCommands;
     private ArrayList<Command> commandsToExecute;
-    
-    private Timer timer;
-    private TimerTask wakeUp;
-    private long delay;
 
-    public Logic(){
+    public Logic(GUI gui, String mapFilePath, boolean network){
         
         newCommands = new ArrayList<>();
         commandsToExecute = new ArrayList<>();
         
         animationInProgress = false;
         
+        g = gui;
+        
         mapStatic = new FieldType[MAX_MAP_SIZE][MAX_MAP_SIZE];
         crates = new ArrayList<>();
         players = new ArrayList<>();
         mapDynamic = new ArrayList<>();
+        
+        
+        
+        try {
+			loadMap(mapFilePath);
+			g.onNewGameState(new GameState(GameState.GameStateType.STATIC_FIELDS, GameState.GamePhase.GAME, mapStatic, null, 0, 0));
+			g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, GameState.GamePhase.GAME, null, mapDynamic, 0, 0));
+			mapDynamic.clear();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     
-    public void setGui(IGameState g) {
-        this.g = g;
-    }
-
     @Override
     public void onCommand(Command c) {
     	newCommands.add(c);
@@ -99,55 +105,55 @@ public class Logic implements ICommand {
     	commandsToExecute.addAll(newCommands);
     	newCommands.clear();
     	for(Command c : commandsToExecute) {
-
-        	//System.out.println(c.lastKeyPressed.getKeyChar());
     		switch (c.command) {
     		case NEW_GAME:
     			break;
     		case OPEN_MAP_FILE:
-    			try {
-					loadMap(c.mapFilePath);
-					g.onNewGameState(new GameState(GameState.GameStateType.STATIC_FIELDS, mapStatic, null, 0, 0));
-					g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, null, mapDynamic, 0, 0));
-					mapDynamic.clear();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
     			break;
     		case KEY_PRESSED:
-    			switch (c.lastKeyPressed.getKeyChar()) {
-    			case 'w':
-    				moveUp(0);
-    				break;
-    			case 'a':
-    				moveLeft(0);
-    				break;
-    			case 's':
-    				moveDown(0);
-    				break;
-    			case 'd':
-    				moveRight(0);
-    				break;
+    			processKeyPress(c);
+    	    	mapDynamic.addAll(players);
+    	    	mapDynamic.addAll(crates);
+    	    	if(!animationInProgress) {
+    	    		animationInProgress = true;
+    				g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, GameState.GamePhase.GAME, null, mapDynamic, 0, 0));
+    	    	}
+    			break;
+    		case ANIMATION_DONE:
+    			if (animationInProgress) {
+        			mapDynamic.clear();
+        		 	animationInProgress = false;
+        	    	resolveDeltas();
+        		 	if(checkForVictory()) {
+        		 		g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.WIN, null, mapDynamic, 0, 0));
+        		 	}
+        		 	if(checkForLoss()) {
+        		 		g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.LOSE, null, mapDynamic, 0, 0));
+        		 	}
     			}
+    			break;
     		}
     	}
-
     	commandsToExecute.clear();
-    	mapDynamic.clear();
-    	mapDynamic.addAll(players);
-    	mapDynamic.addAll(crates);
-    	new Thread(() -> {
-    		try {
-    			 animationInProgress = true;
-    			 g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, null, mapDynamic, 0, 0));
-    		 } finally {
-    		 	mapDynamic.clear();
-    		 	animationInProgress = false;
-    		 }
-    		 }).start();
-    	resolveDeltas();
     }
+    
+    private void processKeyPress(Command c) {
+    	switch (c.lastKeyPressed.getKeyChar()) {
+		case 'w':
+			moveUp(0);
+			break;
+		case 'a':
+			moveLeft(0);
+			break;
+		case 's':
+			moveDown(0);
+			break;
+		case 'd':
+			moveRight(0);
+			break;
+		}
+    }
+    
     private void moveUp(int playerIndex) {
     	switch(blockType(players.get(playerIndex).actual, new Coordinate(0, -1))) {
     	case WALL:
@@ -267,6 +273,7 @@ public class Logic implements ICommand {
     		return;
     	}
     }
+    
     private void moveRight(int playerIndex) {
     	switch(blockType(players.get(playerIndex).actual, new Coordinate(1, 0))) {
     	case GROUND:
@@ -341,6 +348,36 @@ public class Logic implements ICommand {
     		df.actual.add(df.delta);
     		df.delta = new Coordinate (0,0);
     	}
+    }
+    
+    private boolean checkForVictory() {
+    	for (DynamicField crate : crates) {
+    		if(mapStatic[crate.actual.getX()][crate.actual.getY()] != FieldType.TARGET) {
+    			return false;
+    		}
+    	}
+    	return true;
+    }
+    
+    private boolean checkForLoss() {
+    	for (DynamicField crate : crates) {
+    		FieldType above, below, right, left;
+    		boolean aboveFree, belowFree, rightFree, leftFree;
+    		above = blockType (crate.actual, new Coordinate(0, -1));
+    		below = blockType (crate.actual, new Coordinate(0, 1));
+    		right = blockType (crate.actual, new Coordinate(1, 0));
+    		left = blockType (crate.actual, new Coordinate(-1, 0));
+    		aboveFree = (above != FieldType.WALL && above != FieldType.CRATE);
+    		belowFree = (below != FieldType.WALL && below != FieldType.CRATE);
+    		rightFree = (right != FieldType.WALL && right != FieldType.CRATE);
+    		leftFree = (left != FieldType.WALL && left != FieldType.CRATE);
+    		
+    		boolean stuck = !((aboveFree&&belowFree)||(rightFree&&leftFree))&&(mapStatic[crate.actual.getX()][crate.actual.getY()] != FieldType.TARGET);
+    		if (stuck) {
+    			return true;
+    		}
+    	}
+    	return false;
     }
     
 }

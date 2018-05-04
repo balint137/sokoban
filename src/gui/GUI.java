@@ -151,8 +151,12 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 animationInProgress = true;
                 break;
             case TIME:
+            	break;
             case MOVEMENTS:
                 break;
+            case PHASE_UPDATE:
+            	System.out.println(g.phase);
+            	break;
         }
     }
 
