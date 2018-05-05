@@ -7,6 +7,7 @@ import logic.Logic;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -98,19 +99,34 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
         menuItem = new JMenuItem("Server");
         menuItem.addActionListener(e -> {
-            final JFileChooser fileChooser = new JFileChooser();
-            fileChooser.showOpenDialog(null);
+            String path = openMapDialog();
+            if (!path.isEmpty() && path.contains("_multi")) {
+                this.logic = new Logic(this, path, true);
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid map", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
         menu.add(menuItem);
 
         menuItem = new JMenuItem("Local");
         menuItem.addActionListener(e -> {
-            this.logic = new Logic(this, "resources/map.txt", false);
+            String path = openMapDialog();
+            if (!path.isEmpty() && path.contains("_single")) {
+                this.logic = new Logic(this, path, false);
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid map", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
         menu.add(menuItem);
 
         menuItem = new JMenuItem("Local multiplayer");
         menuItem.addActionListener(e -> {
+            String path = openMapDialog();
+            if (!path.isEmpty() && path.contains("_multi")) {
+                this.logic = new Logic(this, path, false);
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid map", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
         menu.add(menuItem);
 
@@ -121,6 +137,25 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         menuBar.add(menuItem);
 
         setJMenuBar(menuBar);
+    }
+
+    private String openMapDialog() {
+        final JFileChooser fileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
+
+        fileChooser.setDialogTitle("Select a map");
+
+        fileChooser.setAcceptAllFileFilterUsed(false);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Sokoban map txt", "txt");
+        fileChooser.addChoosableFileFilter(filter);
+
+        int ret = fileChooser.showOpenDialog(this);
+
+        if (ret == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            return selectedFile.getAbsolutePath();
+        } else {
+            return "";
+        }
     }
 
     @Override
