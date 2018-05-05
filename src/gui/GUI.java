@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class GUI extends JFrame implements IGameState, KeyListener {
     public static final int MAX_MAP_SIZE = 10;
-    boolean animationInProgress;
+    private boolean animationInProgress;
     private int imageSize;
     private Map<FieldType, BufferedImage> fieldToImage;
     private FieldType[][] fields;
@@ -173,7 +173,6 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
     @Override
     public void onNewGameState(GameState g) {
-        System.out.println("New gamestate received");
         switch (g.type) {
             case STATIC_FIELDS:
                 fields = g.staticFields;
@@ -186,12 +185,19 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 animationInProgress = true;
                 break;
             case TIME:
-            	break;
+                break;
             case MOVEMENTS:
                 break;
             case PHASE_UPDATE:
-            	System.out.println(g.phase);
-            	break;
+                switch (g.phase) {
+                    case WIN:
+                        JOptionPane.showMessageDialog(this, "Congratulations, you won!", "Victory", JOptionPane.INFORMATION_MESSAGE);
+                        break;
+                    case LOSE:
+                        JOptionPane.showMessageDialog(this, "You lost!", "Game over", JOptionPane.WARNING_MESSAGE);
+                        break;
+                }
+                break;
         }
     }
 
@@ -212,7 +218,6 @@ public class GUI extends JFrame implements IGameState, KeyListener {
             //amikor utoljara fut le
             if (!animationInProgress) {
                 logic.onCommand(new Command(Command.CommandType.ANIMATION_DONE));
-                System.out.println("Animation done");
             }
         }
     }
