@@ -5,7 +5,6 @@ import java.io.Serializable;
 
 public class Command implements Serializable {
     public CommandType command;
-    public String mapFilePath;
     public KeyEvent lastKeyPressed;
 
     public Command(CommandType command, KeyEvent lastKeyPressed) {
@@ -13,16 +12,11 @@ public class Command implements Serializable {
         this.lastKeyPressed = lastKeyPressed;
     }
 
-    public Command(CommandType command, String mapFilePath) {
-        this.command = command;
-        this.mapFilePath = mapFilePath;
-    }
-
     public Command(CommandType command) {
         this.command = command;
     }
 
     public enum CommandType {
-        OPEN_MAP_FILE, NEW_GAME, KEY_PRESSED, ANIMATION_DONE
+        KEY_PRESSED, ANIMATION_DONE
     }
 }
