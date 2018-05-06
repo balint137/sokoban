@@ -21,18 +21,23 @@ import java.util.Map;
 public class GUI extends JFrame implements IGameState, KeyListener {
     public static final int MAX_MAP_SIZE = 10;
     private boolean animationInProgress;
+    private boolean gameInProgress;
     private int imageSize;
     private Map<FieldType, BufferedImage> fieldToImage;
     private FieldType[][] fields;
     private ArrayList<DynamicFieldAnimation> dynamicFieldAnimations;
     private ICommand logic;
+    private String connectionStatus;
+    private Integer numberOfMoves;
+    private DrawPanel drawPanel;
+    private JPanel statusPanel;
+    private JLabel statusLabel;
 
     public GUI() throws IOException {
         super("Sokoban");
-        setSize(850, 750);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setSize(640, 640);
         setResizable(false);
-        setLayout(new BorderLayout());
         setFocusable(true);
         addKeyListener(this);
 
@@ -40,21 +45,28 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         fields = new FieldType[MAX_MAP_SIZE][MAX_MAP_SIZE];
         dynamicFieldAnimations = new ArrayList<>();
         animationInProgress = false;
+        gameInProgress = false;
+
+        connectionStatus = "-";
+        numberOfMoves = 0;
 
         BuildMenu();
         ReadResourceImages();
 
-        DrawPanel drawPanel = new DrawPanel();
+        drawPanel = new DrawPanel();
         add(drawPanel, BorderLayout.CENTER);
+        drawPanel.setSize(640, 640);
+        drawPanel.setVisible(false);
 
-        JPanel statusPanel = new JPanel();
+        statusPanel = new JPanel();
         statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
-        add(statusPanel, BorderLayout.SOUTH);
-        statusPanel.setPreferredSize(new Dimension(getWidth(), 40));
+        add(statusPanel, BorderLayout.PAGE_END);
+        statusPanel.setSize(new Dimension(getWidth(), 30));
         statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
-        JLabel statusLabel = new JLabel("Status bar");
+        statusLabel = new JLabel();
         statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
         statusPanel.add(statusLabel);
+        updateStatusBar();
 
         setVisible(true);
     }
@@ -102,6 +114,8 @@ public class GUI extends JFrame implements IGameState, KeyListener {
             String path = openMapDialog();
             if (!path.isEmpty() && path.contains("_multi")) {
                 this.logic = new Logic(this, path, true);
+                drawPanel.setVisible(true);
+                gameInProgress = true;
             } else {
                 JOptionPane.showMessageDialog(null, "Invalid map", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -113,6 +127,8 @@ public class GUI extends JFrame implements IGameState, KeyListener {
             String path = openMapDialog();
             if (!path.isEmpty() && path.contains("_single")) {
                 this.logic = new Logic(this, path, false);
+                drawPanel.setVisible(true);
+                gameInProgress = true;
             } else {
                 JOptionPane.showMessageDialog(null, "Invalid map", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -124,6 +140,8 @@ public class GUI extends JFrame implements IGameState, KeyListener {
             String path = openMapDialog();
             if (!path.isEmpty() && path.contains("_multi")) {
                 this.logic = new Logic(this, path, false);
+                drawPanel.setVisible(true);
+                gameInProgress = true;
             } else {
                 JOptionPane.showMessageDialog(null, "Invalid map", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -158,13 +176,22 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         }
     }
 
+    private void updateStatusBar() {
+        statusLabel.setText("Status: " + connectionStatus + ", moves: " + numberOfMoves + ", time:");
+    }
+
     @Override
     public void keyTyped(KeyEvent e) {
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        logic.onCommand(new Command(Command.CommandType.KEY_PRESSED, e));
+        if (gameInProgress) {
+            logic.onCommand(new Command(Command.CommandType.KEY_PRESSED, e));
+        } else {
+            JOptionPane.showMessageDialog(this, "Please start a new game!",
+                    "End of game", JOptionPane.WARNING_MESSAGE);
+        }
     }
 
     @Override
@@ -184,17 +211,21 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 }
                 animationInProgress = true;
                 break;
-            case TIME:
-                break;
             case MOVEMENTS:
+                numberOfMoves = g.numberOfMovements;
+                updateStatusBar();
                 break;
             case PHASE_UPDATE:
                 switch (g.phase) {
                     case WIN:
-                        JOptionPane.showMessageDialog(this, "Congratulations, you won!", "Victory", JOptionPane.INFORMATION_MESSAGE);
+                        gameInProgress = false;
+                        JOptionPane.showMessageDialog(this, "Congratulations, you won!",
+                                "Victory", JOptionPane.INFORMATION_MESSAGE);
                         break;
                     case LOSE:
-                        JOptionPane.showMessageDialog(this, "You lost!", "Game over", JOptionPane.WARNING_MESSAGE);
+                        gameInProgress = false;
+                        JOptionPane.showMessageDialog(this, "You lost!",
+                                "Game over", JOptionPane.WARNING_MESSAGE);
                         break;
                 }
                 break;
