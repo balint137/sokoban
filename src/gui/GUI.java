@@ -100,12 +100,14 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         final BufferedImage crateImage = ImageIO.read(new File("resources/crate.png"));
         final BufferedImage groundImage = ImageIO.read(new File("resources/ground.png"));
         final BufferedImage playerImage = ImageIO.read(new File("resources/player.png"));
+        final BufferedImage player2Image = ImageIO.read(new File("resources/player2.png"));
         final BufferedImage targetImage = ImageIO.read(new File("resources/target.png"));
         final BufferedImage wallImage = ImageIO.read(new File("resources/wall.png"));
 
         fieldToImage.put(FieldType.CRATE, crateImage);
         fieldToImage.put(FieldType.GROUND, groundImage);
         fieldToImage.put(FieldType.PLAYER1, playerImage);
+        fieldToImage.put(FieldType.PLAYER2, player2Image);
         fieldToImage.put(FieldType.TARGET, targetImage);
         fieldToImage.put(FieldType.WALL, wallImage);
 
