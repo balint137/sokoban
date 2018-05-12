@@ -128,7 +128,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         menuItem.addActionListener(e -> {
             String path = openMapDialog();
             if (!path.isEmpty() && path.contains("_multi")) {
-                this.logic = new Logic(this, path, true);
+                this.logic = new Logic(this, path, true, player1KeyboardSetting, player2KeyboardSetting);
                 drawPanel.setVisible(true);
                 gameInProgress = true;
             } else {
@@ -141,7 +141,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         menuItem.addActionListener(e -> {
             String path = openMapDialog();
             if (!path.isEmpty() && path.contains("_single")) {
-                this.logic = new Logic(this, path, false);
+                this.logic = new Logic(this, path, false, player1KeyboardSetting, player2KeyboardSetting);
                 drawPanel.setVisible(true);
                 gameInProgress = true;
             } else {
@@ -154,7 +154,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         menuItem.addActionListener(e -> {
             String path = openMapDialog();
             if (!path.isEmpty() && path.contains("_multi")) {
-                this.logic = new Logic(this, path, false);
+                this.logic = new Logic(this, path, false, player1KeyboardSetting, player2KeyboardSetting);
                 drawPanel.setVisible(true);
                 gameInProgress = true;
             } else {

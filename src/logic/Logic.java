@@ -24,7 +24,7 @@ public class Logic implements ICommand {
     private ArrayList<Command> newCommands;
     private ArrayList<Command> commandsToExecute;
 
-    public Logic(GUI gui, String mapFilePath, boolean network){
+    public Logic(GUI gui, String mapFilePath, boolean network, GUI.KeyboardSetting player1, GUI.KeyboardSetting player2){
 
         newCommands = new ArrayList<>();
         commandsToExecute = new ArrayList<>();
