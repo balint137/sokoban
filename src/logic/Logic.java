@@ -15,42 +15,42 @@ import static gui.GUI.MAX_MAP_SIZE;
 public class Logic implements ICommand {
     private IGameState g;
     private boolean animationInProgress;
-    
+
     private FieldType[][] mapStatic;
     private ArrayList<DynamicField> crates;
     private ArrayList<DynamicField> players;
     private ArrayList<DynamicField> mapDynamic;
-    
+
     private ArrayList<Command> newCommands;
     private ArrayList<Command> commandsToExecute;
 
     public Logic(GUI gui, String mapFilePath, boolean network){
-        
+
         newCommands = new ArrayList<>();
         commandsToExecute = new ArrayList<>();
-        
+
         animationInProgress = false;
-        
+
         g = gui;
-        
+
         mapStatic = new FieldType[MAX_MAP_SIZE][MAX_MAP_SIZE];
         crates = new ArrayList<>();
         players = new ArrayList<>();
         mapDynamic = new ArrayList<>();
-        
-        
-        
+
+
+
         try {
 			loadMap(mapFilePath);
-			g.onNewGameState(new GameState(GameState.GameStateType.STATIC_FIELDS, GameState.GamePhase.GAME, mapStatic, null, 0, 0));
-			g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, GameState.GamePhase.GAME, null, mapDynamic, 0, 0));
+			g.onNewGameState(new GameState(GameState.GameStateType.STATIC_FIELDS, mapStatic));
+			g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, mapDynamic));
 			mapDynamic.clear();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }
-    
+
     @Override
     public void onCommand(Command c) {
     	newCommands.add(c);
@@ -61,7 +61,7 @@ public class Logic implements ICommand {
     	for (FieldType[] col : this.mapStatic) {
             Arrays.fill(col, FieldType.GROUND);
         }
-        
+
         File map = new File(filename);
         Charset encoding = Charset.defaultCharset();
         try (InputStream in = new FileInputStream(map);
@@ -100,16 +100,12 @@ public class Logic implements ICommand {
         	mapDynamic.addAll(crates);
         }
     }
-    
+
     private void executeCommands() {
     	commandsToExecute.addAll(newCommands);
     	newCommands.clear();
     	for(Command c : commandsToExecute) {
     		switch (c.command) {
-    		case NEW_GAME:
-    			break;
-    		case OPEN_MAP_FILE:
-    			break;
     		case KEY_PRESSED:
     	    	if(!animationInProgress) {
 	    			processKeyPress(c);
@@ -121,10 +117,10 @@ public class Logic implements ICommand {
         		 	animationInProgress = false;
         	    	resolveDeltas();
         		 	if(checkForVictory()) {
-        		 		g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.WIN, null, mapDynamic, 0, 0));
+        		 		g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.WIN));
         		 	}
         		 	if(checkForLoss()) {
-        		 		g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.LOSE, null, mapDynamic, 0, 0));
+        		 		g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.LOSE));
         		 	}
     			}
     			break;
@@ -132,7 +128,7 @@ public class Logic implements ICommand {
     	}
     	commandsToExecute.clear();
     }
-    
+
     private void processKeyPress(Command c) {
     	switch (c.lastKeyPressed.getKeyChar()) {
 		case 'w':
@@ -149,7 +145,7 @@ public class Logic implements ICommand {
 			break;
 		}
     }
-    
+
     private void move(int playerIndex, Coordinate dir) {
     	switch(blockType(players.get(playerIndex).actual, dir)) {
     	case GROUND:
@@ -171,9 +167,9 @@ public class Logic implements ICommand {
     	mapDynamic.addAll(players);
     	mapDynamic.addAll(crates);
 		animationInProgress = true;
-		g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, GameState.GamePhase.GAME, null, mapDynamic, 0, 0));
+		g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, mapDynamic));
     }
-    
+
     private void moveCrate(int playerIndex, Coordinate dir) {
 		int crateIndex;
 		switch(blockType(players.get(playerIndex).actual, new Coordinate(dir.getX()*2, dir.getY()*2))) {
@@ -197,7 +193,7 @@ public class Logic implements ICommand {
     		return;
 		}
     }
-    
+
     private FieldType blockType (Coordinate c, Coordinate difference) {
     	for (DynamicField mapElement : crates) {
     		if (mapElement.actual.getX() == (c.getX() + difference.getX()) && mapElement.actual.getY() == (c.getY() + difference.getY())) {
@@ -211,7 +207,7 @@ public class Logic implements ICommand {
     	}
     	return mapStatic[c.getX()+difference.getX()][c.getY()+difference.getY()];
     }
-    
+
     private int findCrateIndex (Coordinate c, Coordinate difference) {
     	int i = 0;
     	for (DynamicField crate : crates) {
@@ -222,7 +218,7 @@ public class Logic implements ICommand {
     	}
     	return -1;
     }
-    
+
     private void resolveDeltas() {
     	for (DynamicField df : players) {
     		df.actual.add(df.delta);
@@ -233,7 +229,7 @@ public class Logic implements ICommand {
     		df.delta = new Coordinate (0,0);
     	}
     }
-    
+
     private boolean checkForVictory() {
     	for (DynamicField crate : crates) {
     		if(mapStatic[crate.actual.getX()][crate.actual.getY()] != FieldType.TARGET) {
@@ -242,7 +238,7 @@ public class Logic implements ICommand {
     	}
     	return true;
     }
-    
+
     private boolean checkForLoss() {
     	for (DynamicField crate : crates) {
     		FieldType above, below, right, left;
@@ -255,7 +251,7 @@ public class Logic implements ICommand {
     		belowFree = (below != FieldType.WALL && below != FieldType.CRATE);
     		rightFree = (right != FieldType.WALL && right != FieldType.CRATE);
     		leftFree = (left != FieldType.WALL && left != FieldType.CRATE);
-    		
+
     		boolean stuck = !((aboveFree&&belowFree)||(rightFree&&leftFree))&&(mapStatic[crate.actual.getX()][crate.actual.getY()] != FieldType.TARGET);
     		if (stuck) {
     			return true;
@@ -263,5 +259,5 @@ public class Logic implements ICommand {
     	}
     	return false;
     }
-    
+
 }
