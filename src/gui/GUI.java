@@ -32,6 +32,9 @@ public class GUI extends JFrame implements IGameState, KeyListener {
     private DrawPanel drawPanel;
     private JPanel statusPanel;
     private JLabel statusLabel;
+    private JLabel settingsLabel;
+    private KeyboardSetting player1KeyboardSetting;
+    private KeyboardSetting player2KeyboardSetting;
 
     public GUI() throws IOException {
         super("Sokoban");
@@ -50,6 +53,9 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         connectionStatus = "-";
         numberOfMoves = 0;
 
+        player1KeyboardSetting = KeyboardSetting.WASD;
+        player2KeyboardSetting = KeyboardSetting.ARROWS;
+
         BuildMenu();
         ReadResourceImages();
 
@@ -63,9 +69,16 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         add(statusPanel, BorderLayout.PAGE_END);
         statusPanel.setSize(new Dimension(getWidth(), 30));
         statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
+
         statusLabel = new JLabel();
         statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        settingsLabel = new JLabel();
+        settingsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+
         statusPanel.add(statusLabel);
+        statusPanel.add(Box.createHorizontalGlue());
+        statusPanel.add(settingsLabel);
+
         updateStatusBar();
 
         setVisible(true);
@@ -150,6 +163,41 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
         menuBar.add(menu);
 
+        menu = new JMenu("Keyboard settings");
+        menuItem = new JMenuItem("Player 1");
+        menuItem.addActionListener(e -> {
+            Object selected = JOptionPane.showInputDialog(this, "Player 1 (local)",
+                    "Player 1 keyboard settings", JOptionPane.DEFAULT_OPTION, null, KeyboardSetting.values(), player1KeyboardSetting);
+            if (selected != null) {
+                KeyboardSetting s = KeyboardSetting.valueOf(selected.toString());
+                if (s != player2KeyboardSetting) {
+                    player1KeyboardSetting = s;
+                    updateStatusBar();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Already selected for Player 2", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        menu.add(menuItem);
+
+        menuItem = new JMenuItem("Player 2");
+        menuItem.addActionListener(e -> {
+            Object selected = JOptionPane.showInputDialog(this, "Player 2 (local multiplayer)",
+                    "Player 2 keyboard settings", JOptionPane.DEFAULT_OPTION, null, KeyboardSetting.values(), player2KeyboardSetting);
+            if (selected != null) {
+                KeyboardSetting s = KeyboardSetting.valueOf(selected.toString());
+                if (s != player1KeyboardSetting) {
+                    player2KeyboardSetting = s;
+                    updateStatusBar();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Already selected for Player 1", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        menu.add(menuItem);
+
+        menuBar.add(menu);
+
         menuItem = new JMenuItem("Exit");
         menuItem.addActionListener(e -> System.exit(0));
         menuBar.add(menuItem);
@@ -178,6 +226,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
     private void updateStatusBar() {
         statusLabel.setText("Status: " + connectionStatus + ", moves: " + numberOfMoves + ", time:");
+        settingsLabel.setText("Player 1: " + player1KeyboardSetting.toString() + ", Player 2: " + player2KeyboardSetting.toString());
     }
 
     @Override
@@ -252,6 +301,8 @@ public class GUI extends JFrame implements IGameState, KeyListener {
             }
         }
     }
+
+    public enum KeyboardSetting {WASD, IJKL, ARROWS}
 
     class DrawPanel extends JPanel {
         @Override
