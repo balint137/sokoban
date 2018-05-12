@@ -130,7 +130,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 drawPanel.setVisible(true);
                 gameInProgress = true;
             } else {
-                JOptionPane.showMessageDialog(null, "Invalid map", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Invalid map", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         menu.add(menuItem);
@@ -143,7 +143,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 drawPanel.setVisible(true);
                 gameInProgress = true;
             } else {
-                JOptionPane.showMessageDialog(null, "Invalid map", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Invalid map", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         menu.add(menuItem);
@@ -156,7 +156,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 drawPanel.setVisible(true);
                 gameInProgress = true;
             } else {
-                JOptionPane.showMessageDialog(null, "Invalid map", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Invalid map", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         menu.add(menuItem);
