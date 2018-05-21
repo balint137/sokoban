@@ -1,11 +1,23 @@
 package network;
 
+import java.awt.Point;
+import java.io.*;
+import java.net.*;
+import javax.swing.JOptionPane;
 import java.util.Scanner;
-import java.io.IOException;
+/*import java.io.IOException;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.UnknownHostException;*/
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 import common.Command;
 import common.GameState;
@@ -14,33 +26,176 @@ import common.IGameState;
 
 public class Network implements ICommand, IGameState {
     
-    public class client {
-	
-	    int number,temp;
-		Scanner sc = new Scanner(System.in);
-		Socket s = new Socket("127.0.0.1",9085);
-		Scanner sc1 = new Scanner(s.getInputStream());
-		System.out.println("Enter any text");
-		number = sc.nextInt();
-		PrintStream p =new PrintStream(s.getOutputStream());
-		p.println(number);
-		temp = sc1.nextInt();
-		System.out.println(temp);
-		
-	}
-    
-    public class server {
+	public class SerialClient extends Network {
 
-		int number,temp;
-		ServerSocket s1 = new ServerSocket(9085);
-		Socket ss = s1.accept();
-		Scanner sc = new Scanner(ss.getInputStream());
-		number = sc.nextInt();
+		private Socket socket = null;
+		private ObjectOutputStream out = null;
+		private ObjectInputStream in = null;
+
+		SerialClient(Control c) {
+			super(c);
+	}
+
+	private class ReceiverThread implements Runnable {
+
+		public void run() {
+			//System.out.println("Waiting for points...");
+			try {
+				while (true) {
+					GameState received = (GameState) in.readObject();
+					ctrl.clickReceived(received);
+				}
+			} catch (Exception ex) {
+				System.out.println(ex.getMessage());
+				System.err.println("Server disconnected!");
+			} finally {
+				disconnect();
+			}
+		}
+		}
+
+		@Override
+		void connect(String ip) {
+			disconnect();
+			try {
+				socket = new Socket(ip, 10007);
+
+				out = new ObjectOutputStream(socket.getOutputStream());
+				in = new ObjectInputStream(socket.getInputStream());
+				out.flush();
+
+				Thread rec = new Thread(new ReceiverThread());
+				rec.start();
+			} catch (UnknownHostException e) {
+				System.err.println("Don't know about host");
+			} catch (IOException e) {
+				System.err.println("Couldn't get I/O for the connection. ");
+				JOptionPane.showMessageDialog(null, "Cannot connect to server!");
+			}
+		}
+
+		@Override
+		void send(Command c) {
+			if (out == null)
+				return;
+			//System.out.println("Sending point: " + p + " to Server");
+			try {
+				out.writeObject(c);
+				out.flush();
+			} catch (IOException ex) {
+				System.err.println("Send error.");
+			}
+		}
+
+		@Override
+		void disconnect() {
+			try {
+				if (out != null)
+					out.close();
+				if (in != null)
+					in.close();
+				if (socket != null)
+					socket.close();
+			} catch (IOException ex) {
+				System.err.println("Error while closing conn.");
+			}
+		}
+	}
+
 		
-		temp = number + 3;
-		
-		PrintStream p = new PrintStream(ss.getOutputStream());
-		p.println(temp);
+	
+    
+   	public class SerialServer extends Network {
+
+		private ServerSocket serverSocket = null;
+		private Socket clientSocket = null;
+		private ObjectOutputStream out = null;
+		private ObjectInputStream in = null;
+
+		SerialServer(Control c) {
+			super(c);
+		}
+
+		private class ReceiverThread implements Runnable {
+
+			public void run() {
+				try {
+					System.out.println("Waiting for Client");
+					clientSocket = serverSocket.accept();
+					System.out.println("Client connected.");
+				} catch (IOException e) {
+					System.err.println("Accept failed.");
+					disconnect();
+					return;
+				}
+
+				try {
+					out = new ObjectOutputStream(clientSocket.getOutputStream());
+					in = new ObjectInputStream(clientSocket.getInputStream());
+					out.flush();
+				} catch (IOException e) {
+					System.err.println("Error while getting streams.");
+					disconnect();
+					return;
+				}
+
+				try {
+					while (true) {
+						Point received = (Point) in.readObject();
+						ctrl.clickReceived(received);
+					}
+				} catch (Exception ex) {
+					System.out.println(ex.getMessage());
+					System.err.println("Client disconnected!");
+				} finally {
+					disconnect();
+				}
+			}
+		}
+
+		@Override
+		void connect(String ip) {
+			disconnect();
+			try {
+				serverSocket = new ServerSocket(10007);
+
+				Thread rec = new Thread(new ReceiverThread());
+				rec.start();
+			} catch (IOException e) {
+				System.err.println("Could not listen on port: 10007.");
+			}
+		}
+
+		@Override
+		void send(Point p) {
+			if (out == null)
+				return;
+			System.out.println("Sending point: " + p + " to Client");
+			try {
+				out.writeObject(p);
+				out.flush();
+			} catch (IOException ex) {
+				System.err.println("Send error.");
+			}
+		}
+
+		@Override
+		void disconnect() {
+			try {
+				if (out != null)
+					out.close();
+				if (in != null)
+					in.close();
+				if (clientSocket != null)
+					clientSocket.close();
+				if (serverSocket != null)
+					serverSocket.close();
+			} catch (IOException ex) {
+				Logger.getLogger(SerialServer.class.getName()).log(Level.SEVERE,
+						null, ex);
+			}
+		}
+
 		
 	}
     
