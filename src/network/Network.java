@@ -17,7 +17,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import gui.GUI;
 
 import common.Command;
 import common.GameState;
@@ -25,16 +25,18 @@ import common.ICommand;
 import common.IGameState;
 
 public class Network implements Command, GameState {
-    
+    	private IGameState IGmSt;
 	Public GameState GmSt;
 	Public Command Cmd;
 	
-	public class SerialClient extends Network {
+	public class SerialClient extends Network (GUI gui) {
 
 		private Socket socket = null;
 		private ObjectOutputStream out = null;
 		private ObjectInputStream in = null;
 
+		g = gui
+		
 		SerialClient(Control c) {
 			super(c);
 		}
@@ -45,8 +47,9 @@ public class Network implements Command, GameState {
 				//System.out.println("Waiting for points...");
 				try {
 					while (true) {
-						Gms = (GameState) in.readObject();
-						ctrl.clickReceived(Gms);
+						IGmSt = (GameState) in.readObject();
+						//ctrl.clickReceived(Gms);
+						g.onNewGamState(IGmSt);
 					}
 				} catch (Exception ex) {
 					System.out.println(ex.getMessage());
