@@ -24,8 +24,11 @@ import common.GameState;
 import common.ICommand;
 import common.IGameState;
 
-public class Network implements ICommand, IGameState {
+public class Network implements Command, GameState {
     
+	Public GameState GmSt;
+	Public Command Cmd;
+	
 	public class SerialClient extends Network {
 
 		private Socket socket = null;
@@ -34,24 +37,24 @@ public class Network implements ICommand, IGameState {
 
 		SerialClient(Control c) {
 			super(c);
-	}
-
-	private class ReceiverThread implements Runnable {
-
-		public void run() {
-			//System.out.println("Waiting for points...");
-			try {
-				while (true) {
-					GameState received = (GameState) in.readObject();
-					ctrl.clickReceived(received);
-				}
-			} catch (Exception ex) {
-				System.out.println(ex.getMessage());
-				System.err.println("Server disconnected!");
-			} finally {
-				disconnect();
-			}
 		}
+
+		private class ReceiverThread implements Runnable {
+
+			public void run() {
+				//System.out.println("Waiting for points...");
+				try {
+					while (true) {
+						Gms = (GameState) in.readObject();
+						ctrl.clickReceived(Gms);
+					}
+				} catch (Exception ex) {
+					System.out.println(ex.getMessage());
+					System.err.println("Server disconnected!");
+				} finally {
+					disconnect();
+				}
+			}
 		}
 
 		@Override
@@ -75,12 +78,12 @@ public class Network implements ICommand, IGameState {
 		}
 
 		@Override
-		void send(Command c) {
+		void send(Command comm) {
 			if (out == null)
 				return;
 			//System.out.println("Sending point: " + p + " to Server");
 			try {
-				out.writeObject(c);
+				out.writeObject(comm);
 				out.flush();
 			} catch (IOException ex) {
 				System.err.println("Send error.");
@@ -141,8 +144,8 @@ public class Network implements ICommand, IGameState {
 
 				try {
 					while (true) {
-						Point received = (Point) in.readObject();
-						ctrl.clickReceived(received);
+						Cmd = (Command) in.readObject();
+						ctrl.clickReceived(Cmd);
 					}
 				} catch (Exception ex) {
 					System.out.println(ex.getMessage());
@@ -167,12 +170,12 @@ public class Network implements ICommand, IGameState {
 		}
 
 		@Override
-		void send(Point p) {
+		void send(GameState Gs){
 			if (out == null)
 				return;
-			System.out.println("Sending point: " + p + " to Client");
+			//System.out.println("Sending point: " + p + " to Client");
 			try {
-				out.writeObject(p);
+				out.writeObject(Gs);
 				out.flush();
 			} catch (IOException ex) {
 				System.err.println("Send error.");
@@ -201,9 +204,12 @@ public class Network implements ICommand, IGameState {
     
     @Override
     public void onNewGameState(GameState g) {
+	    SerialServer.send(g)
     }
 
     @Override
     public void onCommand(Command c) {
+	    SerialClient.send(c)
     }
+
 }
