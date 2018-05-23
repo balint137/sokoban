@@ -25,8 +25,7 @@ import common.ICommand;
 import common.IGameState;
 
 public class Network implements Command, GameState {
-    	private IGameState IGmSt;
-	private ICommand ICom;
+    	private ICommand ICom;
 	Public GameState GmSt;
 	Public Command Cmd;
 	
@@ -36,7 +35,7 @@ public class Network implements Command, GameState {
 		private ObjectOutputStream out = null;
 		private ObjectInputStream in = null;
 
-		g = gui
+		private IGameState g = gui
 		
 		SerialClient(Control c) {
 			super(c);
@@ -112,13 +111,15 @@ public class Network implements Command, GameState {
 		
 	
     
-   	public class SerialServer extends Network {
+   	public class SerialServer extends Network (GUI gui){
 
 		private ServerSocket serverSocket = null;
 		private Socket clientSocket = null;
 		private ObjectOutputStream out = null;
 		private ObjectInputStream in = null;
 
+		private ICommand g = GUI;
+		
 		SerialServer(Control c) {
 			super(c);
 		}
