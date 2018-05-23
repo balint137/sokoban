@@ -28,6 +28,8 @@ public class Logic implements ICommand {
     private Command.KeyboardSetting p2Keyboard;
 
     private int numberOfSteps;
+    private long startTime;
+    private long finishTime;
 
     public Logic(GUI gui, String mapFilePath, boolean network, String name1, String name2, long startTime){
 
@@ -47,6 +49,7 @@ public class Logic implements ICommand {
         p2Keyboard = Command.KeyboardSetting.ARROWS;
 
         numberOfSteps = 0;
+        this.startTime = startTime;
 
         try {
 			loadMap(mapFilePath);
@@ -125,6 +128,7 @@ public class Logic implements ICommand {
         		 	animationInProgress = false;
         	    	resolveDeltas();
         		 	if(checkForVictory()) {
+        		 		finishTime = System.currentTimeMillis() - startTime;
         		 		g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.WIN));
         		 	}
         		 	if(checkForLoss()) {
