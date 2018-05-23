@@ -40,6 +40,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
     private String player1Name;
     private String player2Name;
     private long startTime;
+    private String highscores;
 
     public GUI() throws IOException {
         super("Sokoban");
@@ -63,6 +64,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         player2KeyboardSetting = KeyboardSetting.ARROWS;
         player1Name = "";
         player2Name = "";
+        highscores = "";
 
         BuildMenu();
         ReadResourceImages();
@@ -236,6 +238,10 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
         menuBar.add(menu);
 
+        menuItem = new JMenuItem("Highscores");
+        menuItem.addActionListener(e -> JOptionPane.showMessageDialog(this, highscores));
+        menuBar.add(menuItem);
+
         menuItem = new JMenuItem("Exit");
         menuItem.addActionListener(e -> System.exit(0));
         menuBar.add(menuItem);
@@ -330,6 +336,9 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                                 "Game over", JOptionPane.WARNING_MESSAGE);
                         break;
                 }
+                break;
+            case HIGHSCORES:
+                highscores = g.highscores;
                 break;
         }
     }

@@ -9,6 +9,7 @@ public class GameState implements Serializable {
     public ArrayList<DynamicField> dynamicFields;
     public int numberOfMovements;
     public GamePhase phase;
+    public String highscores;
 
     public GameState(GameStateType type, FieldType[][] staticFields) {
         this.type = type;
@@ -30,9 +31,14 @@ public class GameState implements Serializable {
         this.phase = phase;
     }
 
+    public GameState(GameStateType type, String highscores) {
+        this.type = type;
+        this.highscores = highscores;
+    }
+
     public enum FieldType {GROUND, WALL, PLAYER1, PLAYER2, CRATE, TARGET}
 
-    public enum GameStateType {STATIC_FIELDS, DYNAMIC_FIELDS, TIME, MOVEMENTS, PHASE_UPDATE}
+    public enum GameStateType {STATIC_FIELDS, DYNAMIC_FIELDS, MOVEMENTS, PHASE_UPDATE, HIGHSCORES}
 
     public enum GamePhase {WIN, LOSE}
 }
