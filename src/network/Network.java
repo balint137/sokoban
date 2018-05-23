@@ -26,6 +26,7 @@ import common.IGameState;
 
 public class Network implements Command, GameState {
     	private IGameState IGmSt;
+	private ICommand ICom;
 	Public GameState GmSt;
 	Public Command Cmd;
 	
@@ -185,6 +186,11 @@ public class Network implements Command, GameState {
 			}
 		}
 
+	   	@Override
+	   	public void onNewGameState(GameState g) {
+	   		SerialServer.send(g)
+	  	}
+
 		@Override
 		void disconnect() {
 			try {
@@ -205,10 +211,6 @@ public class Network implements Command, GameState {
 		
 	}
     
-    @Override
-    public void onNewGameState(GameState g) {
-	    SerialServer.send(g)
-    }
 
     @Override
     public void onCommand(Command c) {
