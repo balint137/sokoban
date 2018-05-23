@@ -23,13 +23,13 @@ public class Logic implements ICommand {
 
     private ArrayList<Command> newCommands;
     private ArrayList<Command> commandsToExecute;
-    
+
     private GUI.KeyboardSetting p1Keyboard;
     private GUI.KeyboardSetting p2Keyboard;
-    
+
     private int numberOfSteps;
 
-    public Logic(GUI gui, String mapFilePath, boolean network, GUI.KeyboardSetting player1, GUI.KeyboardSetting player2){
+    public Logic(GUI gui, String mapFilePath, boolean network, GUI.KeyboardSetting player1, GUI.KeyboardSetting player2, String name1, String name2, long startTime){
 
         newCommands = new ArrayList<>();
         commandsToExecute = new ArrayList<>();
@@ -45,7 +45,7 @@ public class Logic implements ICommand {
 
         p1Keyboard = player1;
         p2Keyboard = player2;
-        
+
         numberOfSteps = 0;
 
         try {

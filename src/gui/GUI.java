@@ -36,6 +36,8 @@ public class GUI extends JFrame implements IGameState, KeyListener {
     private JLabel settingsLabel;
     private KeyboardSetting player1KeyboardSetting;
     private KeyboardSetting player2KeyboardSetting;
+    private String player1Name;
+    private String player2Name;
     private long startTime;
 
     public GUI() throws IOException {
@@ -58,6 +60,8 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
         player1KeyboardSetting = KeyboardSetting.WASD;
         player2KeyboardSetting = KeyboardSetting.ARROWS;
+        player1Name = "";
+        player2Name = "";
 
         BuildMenu();
         ReadResourceImages();
@@ -136,7 +140,11 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         menuItem.addActionListener(e -> {
             String path = openMapDialog();
             if (!path.isEmpty() && path.contains("_multi")) {
-                this.logic = new Logic(this, path, true, player1KeyboardSetting, player2KeyboardSetting);
+                if (player1Name.isEmpty() || player2Name.isEmpty()) {
+                    player1Name = JOptionPane.showInputDialog("Player 1 name:");
+                    player2Name = JOptionPane.showInputDialog("Player 2 name:");
+                }
+                this.logic = new Logic(this, path, true, player1KeyboardSetting, player2KeyboardSetting, player1Name, player2Name, startTime);
                 drawPanel.setVisible(true);
                 gameInProgress = true;
                 startTime = System.currentTimeMillis();
@@ -150,7 +158,10 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         menuItem.addActionListener(e -> {
             String path = openMapDialog();
             if (!path.isEmpty() && path.contains("_single")) {
-                this.logic = new Logic(this, path, false, player1KeyboardSetting, player2KeyboardSetting);
+                if (player1Name.isEmpty()) {
+                    player1Name = JOptionPane.showInputDialog("Player 1 name:");
+                }
+                this.logic = new Logic(this, path, false, player1KeyboardSetting, player2KeyboardSetting, player1Name, player2Name, startTime);
                 drawPanel.setVisible(true);
                 gameInProgress = true;
                 startTime = System.currentTimeMillis();
@@ -164,7 +175,11 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         menuItem.addActionListener(e -> {
             String path = openMapDialog();
             if (!path.isEmpty() && path.contains("_multi")) {
-                this.logic = new Logic(this, path, false, player1KeyboardSetting, player2KeyboardSetting);
+                if (player1Name.isEmpty() || player2Name.isEmpty()) {
+                    player1Name = JOptionPane.showInputDialog("Player 1 name:");
+                    player2Name = JOptionPane.showInputDialog("Player 2 name:");
+                }
+                this.logic = new Logic(this, path, false, player1KeyboardSetting, player2KeyboardSetting, player1Name, player2Name, startTime);
                 drawPanel.setVisible(true);
                 gameInProgress = true;
                 startTime = System.currentTimeMillis();
