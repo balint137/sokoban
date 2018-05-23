@@ -1,6 +1,7 @@
 package gui;
 
 import common.*;
+import common.Command.KeyboardSetting;
 import common.GameState.FieldType;
 import logic.Logic;
 
@@ -144,7 +145,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                     player1Name = JOptionPane.showInputDialog("Player 1 name:");
                     player2Name = JOptionPane.showInputDialog("Player 2 name:");
                 }
-                this.logic = new Logic(this, path, true, player1KeyboardSetting, player2KeyboardSetting, player1Name, player2Name, startTime);
+                this.logic = new Logic(this, path, true, player1Name, player2Name, startTime);
                 drawPanel.setVisible(true);
                 gameInProgress = true;
                 startTime = System.currentTimeMillis();
@@ -161,7 +162,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 if (player1Name.isEmpty()) {
                     player1Name = JOptionPane.showInputDialog("Player 1 name:");
                 }
-                this.logic = new Logic(this, path, false, player1KeyboardSetting, player2KeyboardSetting, player1Name, player2Name, startTime);
+                this.logic = new Logic(this, path, false, player1Name, player2Name, startTime);
                 drawPanel.setVisible(true);
                 gameInProgress = true;
                 startTime = System.currentTimeMillis();
@@ -179,7 +180,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                     player1Name = JOptionPane.showInputDialog("Player 1 name:");
                     player2Name = JOptionPane.showInputDialog("Player 2 name:");
                 }
-                this.logic = new Logic(this, path, false, player1KeyboardSetting, player2KeyboardSetting, player1Name, player2Name, startTime);
+                this.logic = new Logic(this, path, false, player1Name, player2Name, startTime);
                 drawPanel.setVisible(true);
                 gameInProgress = true;
                 startTime = System.currentTimeMillis();
@@ -200,6 +201,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 KeyboardSetting s = KeyboardSetting.valueOf(selected.toString());
                 if (s != player2KeyboardSetting) {
                     player1KeyboardSetting = s;
+                    logic.onCommand(new Command(Command.CommandType.KEY_MAP, player1KeyboardSetting, null));
                     updateStatusBar();
                 } else {
                     JOptionPane.showMessageDialog(this, "Already selected for Player 2", "Error", JOptionPane.ERROR_MESSAGE);
@@ -216,6 +218,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 KeyboardSetting s = KeyboardSetting.valueOf(selected.toString());
                 if (s != player1KeyboardSetting) {
                     player2KeyboardSetting = s;
+                    logic.onCommand(new Command(Command.CommandType.KEY_MAP, null, player2KeyboardSetting));
                     updateStatusBar();
                 } else {
                     JOptionPane.showMessageDialog(this, "Already selected for Player 1", "Error", JOptionPane.ERROR_MESSAGE);
@@ -347,8 +350,6 @@ public class GUI extends JFrame implements IGameState, KeyListener {
             updateTime();
         }
     }
-
-    public enum KeyboardSetting {WASD, IJKL, ARROWS}
 
     class DrawPanel extends JPanel {
         @Override
