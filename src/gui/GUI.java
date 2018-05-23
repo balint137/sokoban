@@ -32,9 +32,11 @@ public class GUI extends JFrame implements IGameState, KeyListener {
     private DrawPanel drawPanel;
     private JPanel statusPanel;
     private JLabel statusLabel;
+    private JLabel timeLabel;
     private JLabel settingsLabel;
     private KeyboardSetting player1KeyboardSetting;
     private KeyboardSetting player2KeyboardSetting;
+    private long startTime;
 
     public GUI() throws IOException {
         super("Sokoban");
@@ -52,6 +54,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
         connectionStatus = "-";
         numberOfMoves = 0;
+        startTime = 0;
 
         player1KeyboardSetting = KeyboardSetting.WASD;
         player2KeyboardSetting = KeyboardSetting.ARROWS;
@@ -72,14 +75,19 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
         statusLabel = new JLabel();
         statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        timeLabel = new JLabel();
+        timeLabel.setHorizontalAlignment(SwingConstants.CENTER);
         settingsLabel = new JLabel();
         settingsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 
         statusPanel.add(statusLabel);
         statusPanel.add(Box.createHorizontalGlue());
+        statusPanel.add(timeLabel);
+        statusPanel.add(Box.createHorizontalGlue());
         statusPanel.add(settingsLabel);
 
         updateStatusBar();
+        updateTime();
 
         setVisible(true);
     }
@@ -131,6 +139,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 this.logic = new Logic(this, path, true, player1KeyboardSetting, player2KeyboardSetting);
                 drawPanel.setVisible(true);
                 gameInProgress = true;
+                startTime = System.currentTimeMillis();
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid map", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -144,6 +153,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 this.logic = new Logic(this, path, false, player1KeyboardSetting, player2KeyboardSetting);
                 drawPanel.setVisible(true);
                 gameInProgress = true;
+                startTime = System.currentTimeMillis();
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid map", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -157,6 +167,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 this.logic = new Logic(this, path, false, player1KeyboardSetting, player2KeyboardSetting);
                 drawPanel.setVisible(true);
                 gameInProgress = true;
+                startTime = System.currentTimeMillis();
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid map", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -227,8 +238,23 @@ public class GUI extends JFrame implements IGameState, KeyListener {
     }
 
     private void updateStatusBar() {
-        statusLabel.setText("Status: " + connectionStatus + ", moves: " + numberOfMoves + ", time:");
+        statusLabel.setText("Status: " + connectionStatus + ", moves: " + numberOfMoves);
         settingsLabel.setText("Player 1: " + player1KeyboardSetting.toString() + ", Player 2: " + player2KeyboardSetting.toString());
+    }
+
+    private void updateTime() {
+        long elapsed = System.currentTimeMillis() - startTime;
+        long second = (elapsed / 1000) % 60;
+        long minute = (elapsed / (1000 * 60)) % 60;
+        String time;
+
+        if (startTime == 0) {
+            time = "--:--";
+        } else {
+            time = String.format("%02d:%02d", minute, second);
+        }
+
+        timeLabel.setText("Elapsed time: " + time);
     }
 
     @Override
@@ -301,6 +327,9 @@ public class GUI extends JFrame implements IGameState, KeyListener {
             if (!animationInProgress) {
                 logic.onCommand(new Command(Command.CommandType.ANIMATION_DONE));
             }
+        }
+        if (gameInProgress) {
+            updateTime();
         }
     }
 
