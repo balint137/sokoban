@@ -23,6 +23,11 @@ public class Logic implements ICommand {
 
     private ArrayList<Command> newCommands;
     private ArrayList<Command> commandsToExecute;
+    
+    private GUI.KeyboardSetting p1Keyboard;
+    private GUI.KeyboardSetting p2Keyboard;
+    
+    private int numberOfSteps;
 
     public Logic(GUI gui, String mapFilePath, boolean network, GUI.KeyboardSetting player1, GUI.KeyboardSetting player2){
 
@@ -38,7 +43,10 @@ public class Logic implements ICommand {
         players = new ArrayList<>();
         mapDynamic = new ArrayList<>();
 
-
+        p1Keyboard = player1;
+        p2Keyboard = player2;
+        
+        numberOfSteps = 0;
 
         try {
 			loadMap(mapFilePath);
@@ -130,29 +138,117 @@ public class Logic implements ICommand {
     }
 
     private void processKeyPress(Command c) {
-    	switch (c.lastKeyPressed.getKeyChar()) {
-		case 'w':
-			move(0, new Coordinate(0,-1));
+    	switch (c.lastKeyPressed.getKeyCode()) {
+		case 87: //W
+			if (p1Keyboard == GUI.KeyboardSetting.WASD) {
+				move(0, new Coordinate(0,-1));
+			}
+			else if (p2Keyboard == GUI.KeyboardSetting.WASD&&players.size() == 2) {
+				move(1, new Coordinate(0,-1));
+			}
 			break;
-		case 'a':
-			move(0, new Coordinate(-1, 0));
+		case 65: //A
+			if (p1Keyboard == GUI.KeyboardSetting.WASD) {
+				move(0, new Coordinate(-1, 0));
+			}
+			else if (p2Keyboard == GUI.KeyboardSetting.WASD&&players.size() == 2) {
+				move(1, new Coordinate(-1, 0));
+			}
 			break;
-		case 's':
-			move(0, new Coordinate(0,1));
+		case 83: //S
+			if (p1Keyboard == GUI.KeyboardSetting.WASD) {
+				move(0, new Coordinate(0,1));
+			}
+			else if (p2Keyboard == GUI.KeyboardSetting.WASD&&players.size() == 2) {
+				move(1, new Coordinate(0,1));
+			}
 			break;
-		case 'd':
-			move(0, new Coordinate(1, 0));
+		case 68: //D
+			if (p1Keyboard == GUI.KeyboardSetting.WASD) {
+				move(0, new Coordinate(1,0));
+			}
+			else if (p2Keyboard == GUI.KeyboardSetting.WASD&&players.size() == 2) {
+				move(1, new Coordinate(1,0));
+			}
 			break;
-		}
+		case 73: //I
+			if (p1Keyboard == GUI.KeyboardSetting.IJKL) {
+				move(0, new Coordinate(0,-1));
+			}
+			else if (p2Keyboard == GUI.KeyboardSetting.IJKL&&players.size() == 2) {
+				move(1, new Coordinate(0,-1));
+			}
+			break;
+		case 74: //J
+			if (p1Keyboard == GUI.KeyboardSetting.IJKL) {
+				move(0, new Coordinate(-1, 0));
+			}
+			else if (p2Keyboard == GUI.KeyboardSetting.IJKL&&players.size() == 2) {
+				move(1, new Coordinate(-1, 0));
+			}
+			break;
+		case 75: //K
+			if (p1Keyboard == GUI.KeyboardSetting.IJKL) {
+				move(0, new Coordinate(0,1));
+			}
+			else if (p2Keyboard == GUI.KeyboardSetting.IJKL&&players.size() == 2) {
+				move(1, new Coordinate(0,1));
+			}
+			break;
+		case 76: //L
+			if (p1Keyboard == GUI.KeyboardSetting.IJKL) {
+				move(0, new Coordinate(1,0));
+			}
+			else if (p2Keyboard == GUI.KeyboardSetting.IJKL&&players.size() == 2) {
+				move(1, new Coordinate(1,0));
+			}
+			break;
+		case 38: //UP
+			if (p1Keyboard == GUI.KeyboardSetting.ARROWS) {
+				move(0, new Coordinate(0,-1));
+			}
+			else if (p2Keyboard == GUI.KeyboardSetting.ARROWS&&players.size() == 2) {
+				move(1, new Coordinate(0,-1));
+			}
+			break;
+		case 37: //LEFT
+			if (p1Keyboard == GUI.KeyboardSetting.ARROWS) {
+				move(0, new Coordinate(-1, 0));
+			}
+			else if (p2Keyboard == GUI.KeyboardSetting.ARROWS&&players.size() == 2) {
+				move(1, new Coordinate(-1, 0));
+			}
+			break;
+		case 40: //DOWN
+			if (p1Keyboard == GUI.KeyboardSetting.ARROWS) {
+				move(0, new Coordinate(0,1));
+			}
+			else if (p2Keyboard == GUI.KeyboardSetting.ARROWS&&players.size() == 2) {
+				move(1, new Coordinate(0,1));
+			}
+			break;
+		case 39: //RIGHT
+			if (p1Keyboard == GUI.KeyboardSetting.ARROWS) {
+				move(0, new Coordinate(1,0));
+			}
+			else if (p2Keyboard == GUI.KeyboardSetting.ARROWS&&players.size() == 2) {
+				move(1, new Coordinate(1,0));
+			}
+			break;
+		default:
+			break;
+    	}
     }
 
     private void move(int playerIndex, Coordinate dir) {
     	switch(blockType(players.get(playerIndex).actual, dir)) {
     	case GROUND:
-    		players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, dir));
+    		players.set(playerIndex, new DynamicField(players.get(playerIndex).type, players.get(playerIndex).actual, dir));
+    		numberOfSteps++;
     		break;
     	case TARGET:
-    		players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, dir));
+    		players.set(playerIndex, new DynamicField(players.get(playerIndex).type, players.get(playerIndex).actual, dir));
+    		numberOfSteps++;
     		break;
     	case CRATE:
     		moveCrate(playerIndex, dir);
@@ -167,6 +263,7 @@ public class Logic implements ICommand {
     	mapDynamic.addAll(players);
     	mapDynamic.addAll(crates);
 		animationInProgress = true;
+		g.onNewGameState(new GameState(GameState.GameStateType.MOVEMENTS, numberOfSteps));
 		g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, mapDynamic));
     }
 
@@ -174,14 +271,16 @@ public class Logic implements ICommand {
 		int crateIndex;
 		switch(blockType(players.get(playerIndex).actual, new Coordinate(dir.getX()*2, dir.getY()*2))) {
 		case GROUND:
-			players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, dir));
+			players.set(playerIndex, new DynamicField(players.get(playerIndex).type, players.get(playerIndex).actual, dir));
 			crateIndex = findCrateIndex(players.get(playerIndex).actual, dir);
 			crates.set(crateIndex, new DynamicField(FieldType.CRATE, crates.get(crateIndex).actual, dir));
+			numberOfSteps++;
 			return;
 		case TARGET:
-			players.set(playerIndex, new DynamicField(FieldType.PLAYER1, players.get(playerIndex).actual, dir));
+			players.set(playerIndex, new DynamicField(players.get(playerIndex).type, players.get(playerIndex).actual, dir));
 			crateIndex = findCrateIndex(players.get(playerIndex).actual, dir);
 			crates.set(crateIndex, new DynamicField(FieldType.CRATE, crates.get(crateIndex).actual, dir));
+			numberOfSteps++;
 			return;
 		case CRATE:
     		return;
