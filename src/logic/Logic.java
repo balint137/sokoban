@@ -24,12 +24,12 @@ public class Logic implements ICommand {
     private ArrayList<Command> newCommands;
     private ArrayList<Command> commandsToExecute;
 
-    private GUI.KeyboardSetting p1Keyboard;
-    private GUI.KeyboardSetting p2Keyboard;
+    private Command.KeyboardSetting p1Keyboard;
+    private Command.KeyboardSetting p2Keyboard;
 
     private int numberOfSteps;
 
-    public Logic(GUI gui, String mapFilePath, boolean network, GUI.KeyboardSetting player1, GUI.KeyboardSetting player2, String name1, String name2, long startTime){
+    public Logic(GUI gui, String mapFilePath, boolean network, String name1, String name2, long startTime){
 
         newCommands = new ArrayList<>();
         commandsToExecute = new ArrayList<>();
@@ -43,8 +43,8 @@ public class Logic implements ICommand {
         players = new ArrayList<>();
         mapDynamic = new ArrayList<>();
 
-        p1Keyboard = player1;
-        p2Keyboard = player2;
+        p1Keyboard = Command.KeyboardSetting.WASD;
+        p2Keyboard = Command.KeyboardSetting.ARROWS;
 
         numberOfSteps = 0;
 
@@ -132,6 +132,9 @@ public class Logic implements ICommand {
         		 	}
     			}
     			break;
+    		case KEY_MAP:
+    			if(c.player1!=null)p1Keyboard = c.player1;
+    			if(c.player2!=null)p2Keyboard = c.player2;
     		}
     	}
     	commandsToExecute.clear();
@@ -140,99 +143,99 @@ public class Logic implements ICommand {
     private void processKeyPress(Command c) {
     	switch (c.lastKeyPressed.getKeyCode()) {
 		case 87: //W
-			if (p1Keyboard == GUI.KeyboardSetting.WASD) {
-				move(0, new Coordinate(0,-1));
+			if (p1Keyboard == Command.KeyboardSetting.WASD) {
+				move(GameState.FieldType.PLAYER1, new Coordinate(0,-1));
 			}
-			else if (p2Keyboard == GUI.KeyboardSetting.WASD&&players.size() == 2) {
-				move(1, new Coordinate(0,-1));
+			else if (p2Keyboard == Command.KeyboardSetting.WASD&&players.size() == 2) {
+				move(GameState.FieldType.PLAYER2, new Coordinate(0,-1));
 			}
 			break;
 		case 65: //A
-			if (p1Keyboard == GUI.KeyboardSetting.WASD) {
-				move(0, new Coordinate(-1, 0));
+			if (p1Keyboard == Command.KeyboardSetting.WASD) {
+				move(GameState.FieldType.PLAYER1, new Coordinate(-1, 0));
 			}
-			else if (p2Keyboard == GUI.KeyboardSetting.WASD&&players.size() == 2) {
-				move(1, new Coordinate(-1, 0));
+			else if (p2Keyboard == Command.KeyboardSetting.WASD&&players.size() == 2) {
+				move(GameState.FieldType.PLAYER2, new Coordinate(-1, 0));
 			}
 			break;
 		case 83: //S
-			if (p1Keyboard == GUI.KeyboardSetting.WASD) {
-				move(0, new Coordinate(0,1));
+			if (p1Keyboard == Command.KeyboardSetting.WASD) {
+				move(GameState.FieldType.PLAYER1, new Coordinate(0,1));
 			}
-			else if (p2Keyboard == GUI.KeyboardSetting.WASD&&players.size() == 2) {
-				move(1, new Coordinate(0,1));
+			else if (p2Keyboard == Command.KeyboardSetting.WASD&&players.size() == 2) {
+				move(GameState.FieldType.PLAYER2, new Coordinate(0,1));
 			}
 			break;
 		case 68: //D
-			if (p1Keyboard == GUI.KeyboardSetting.WASD) {
-				move(0, new Coordinate(1,0));
+			if (p1Keyboard == Command.KeyboardSetting.WASD) {
+				move(GameState.FieldType.PLAYER1, new Coordinate(1,0));
 			}
-			else if (p2Keyboard == GUI.KeyboardSetting.WASD&&players.size() == 2) {
-				move(1, new Coordinate(1,0));
+			else if (p2Keyboard == Command.KeyboardSetting.WASD&&players.size() == 2) {
+				move(GameState.FieldType.PLAYER2, new Coordinate(1,0));
 			}
 			break;
 		case 73: //I
-			if (p1Keyboard == GUI.KeyboardSetting.IJKL) {
-				move(0, new Coordinate(0,-1));
+			if (p1Keyboard == Command.KeyboardSetting.IJKL) {
+				move(GameState.FieldType.PLAYER1, new Coordinate(0,-1));
 			}
-			else if (p2Keyboard == GUI.KeyboardSetting.IJKL&&players.size() == 2) {
-				move(1, new Coordinate(0,-1));
+			else if (p2Keyboard == Command.KeyboardSetting.IJKL&&players.size() == 2) {
+				move(GameState.FieldType.PLAYER2, new Coordinate(0,-1));
 			}
 			break;
 		case 74: //J
-			if (p1Keyboard == GUI.KeyboardSetting.IJKL) {
-				move(0, new Coordinate(-1, 0));
+			if (p1Keyboard == Command.KeyboardSetting.IJKL) {
+				move(GameState.FieldType.PLAYER1, new Coordinate(-1, 0));
 			}
-			else if (p2Keyboard == GUI.KeyboardSetting.IJKL&&players.size() == 2) {
-				move(1, new Coordinate(-1, 0));
+			else if (p2Keyboard == Command.KeyboardSetting.IJKL&&players.size() == 2) {
+				move(GameState.FieldType.PLAYER2, new Coordinate(-1, 0));
 			}
 			break;
 		case 75: //K
-			if (p1Keyboard == GUI.KeyboardSetting.IJKL) {
-				move(0, new Coordinate(0,1));
+			if (p1Keyboard == Command.KeyboardSetting.IJKL) {
+				move(GameState.FieldType.PLAYER1, new Coordinate(0,1));
 			}
-			else if (p2Keyboard == GUI.KeyboardSetting.IJKL&&players.size() == 2) {
-				move(1, new Coordinate(0,1));
+			else if (p2Keyboard == Command.KeyboardSetting.IJKL&&players.size() == 2) {
+				move(GameState.FieldType.PLAYER2, new Coordinate(0,1));
 			}
 			break;
 		case 76: //L
-			if (p1Keyboard == GUI.KeyboardSetting.IJKL) {
-				move(0, new Coordinate(1,0));
+			if (p1Keyboard == Command.KeyboardSetting.IJKL) {
+				move(GameState.FieldType.PLAYER1, new Coordinate(1,0));
 			}
-			else if (p2Keyboard == GUI.KeyboardSetting.IJKL&&players.size() == 2) {
-				move(1, new Coordinate(1,0));
+			else if (p2Keyboard == Command.KeyboardSetting.IJKL&&players.size() == 2) {
+				move(GameState.FieldType.PLAYER2, new Coordinate(1,0));
 			}
 			break;
 		case 38: //UP
-			if (p1Keyboard == GUI.KeyboardSetting.ARROWS) {
-				move(0, new Coordinate(0,-1));
+			if (p1Keyboard == Command.KeyboardSetting.ARROWS) {
+				move(GameState.FieldType.PLAYER1, new Coordinate(0,-1));
 			}
-			else if (p2Keyboard == GUI.KeyboardSetting.ARROWS&&players.size() == 2) {
-				move(1, new Coordinate(0,-1));
+			else if (p2Keyboard == Command.KeyboardSetting.ARROWS&&players.size() == 2) {
+				move(GameState.FieldType.PLAYER2, new Coordinate(0,-1));
 			}
 			break;
 		case 37: //LEFT
-			if (p1Keyboard == GUI.KeyboardSetting.ARROWS) {
-				move(0, new Coordinate(-1, 0));
+			if (p1Keyboard == Command.KeyboardSetting.ARROWS) {
+				move(GameState.FieldType.PLAYER1, new Coordinate(-1, 0));
 			}
-			else if (p2Keyboard == GUI.KeyboardSetting.ARROWS&&players.size() == 2) {
-				move(1, new Coordinate(-1, 0));
+			else if (p2Keyboard == Command.KeyboardSetting.ARROWS&&players.size() == 2) {
+				move(GameState.FieldType.PLAYER2, new Coordinate(-1, 0));
 			}
 			break;
 		case 40: //DOWN
-			if (p1Keyboard == GUI.KeyboardSetting.ARROWS) {
-				move(0, new Coordinate(0,1));
+			if (p1Keyboard == Command.KeyboardSetting.ARROWS) {
+				move(GameState.FieldType.PLAYER1, new Coordinate(0,1));
 			}
-			else if (p2Keyboard == GUI.KeyboardSetting.ARROWS&&players.size() == 2) {
-				move(1, new Coordinate(0,1));
+			else if (p2Keyboard == Command.KeyboardSetting.ARROWS&&players.size() == 2) {
+				move(GameState.FieldType.PLAYER2, new Coordinate(0,1));
 			}
 			break;
 		case 39: //RIGHT
-			if (p1Keyboard == GUI.KeyboardSetting.ARROWS) {
-				move(0, new Coordinate(1,0));
+			if (p1Keyboard == Command.KeyboardSetting.ARROWS) {
+				move(GameState.FieldType.PLAYER1, new Coordinate(1,0));
 			}
-			else if (p2Keyboard == GUI.KeyboardSetting.ARROWS&&players.size() == 2) {
-				move(1, new Coordinate(1,0));
+			else if (p2Keyboard == Command.KeyboardSetting.ARROWS&&players.size() == 2) {
+				move(GameState.FieldType.PLAYER2, new Coordinate(1,0));
 			}
 			break;
 		default:
@@ -240,7 +243,13 @@ public class Logic implements ICommand {
     	}
     }
 
-    private void move(int playerIndex, Coordinate dir) {
+    private void move(FieldType player, Coordinate dir) {
+    	int playerIndex = 0;
+    	for (int i=0;i<players.size(); i++) {
+    		if (players.get(i).type.equals(player)) {
+    			playerIndex = i;
+    		}
+    	}
     	switch(blockType(players.get(playerIndex).actual, dir)) {
     	case GROUND:
     		players.set(playerIndex, new DynamicField(players.get(playerIndex).type, players.get(playerIndex).actual, dir));
