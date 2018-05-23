@@ -14,7 +14,7 @@ import common.GameState;
 import common.ICommand;
 import common.IGameState;
 
-public class SerialServer implements IGameState {
+public class SerialServer implements IGameState  {
     	
 	private ICommand g;
 	private Command Cmd;	
@@ -23,19 +23,13 @@ public class SerialServer implements IGameState {
 	private ObjectOutputStream out = null;
 	private ObjectInputStream in = null;
 	
-   	public class SerialServer (GUI gui){
+   	public SerialServer (GUI gui){
 
-		g = GUI;
+		g = gui;
 			
-		SerialServer(Control c) {
-			super(c);
-		}
 		disconnect();
 		try {
 			serverSocket = new ServerSocket(10007);
-
-			Thread rec = new Thread(new ReceiverThread());
-			rec.start();
 		} catch (IOException e) {
 			System.err.println("Could not listen on port: 10007.");
 		}
@@ -70,34 +64,32 @@ public class SerialServer implements IGameState {
 		} finally {
 			disconnect();
 		}
-	
-	   	@Override
-		void disconnect() {
-			try {
-				if (out != null)
-					out.close();
-				if (in != null)
-					in.close();
-				if (clientSocket != null)
-					clientSocket.close();
-				if (serverSocket != null)
-					serverSocket.close();
-			} catch (IOException ex) {
-				Logger.getLogger(SerialServer.class.getName()).log(Level.SEVERE,
-						null, ex);
-			}
-		}
-
-		
+			
 	}
     
+   	void disconnect() {
+		try {
+			if (out != null)
+				out.close();
+			if (in != null)
+				in.close();
+			if (clientSocket != null)
+				clientSocket.close();
+			if (serverSocket != null)
+				serverSocket.close();
+		} catch (IOException ex) {
+			Logger.getLogger(SerialServer.class.getName()).log(Level.SEVERE,
+					null, ex);
+		}
+	}
+   	
 	@Override
 	public void onNewGameState(GameState g) {
-		SerialServer.send(g);
+		send(g);
 	}
 	
-	@Override
-	void send(GameState Gs){
+	
+	private void send(GameState Gs){
 		if (out == null)
 			return;
 		//System.out.println("Sending point: " + p + " to Client");
