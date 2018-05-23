@@ -13,21 +13,17 @@ import common.ICommand;
 import common.IGameState;
 
 public class SerialClient implements ICommand {
-    	private IGameState g;
+    private IGameState g;
 	private GameState GmSt;
 	private Socket socket = null;
 	private ObjectOutputStream out = null;
 	private ObjectInputStream in = null;
 
 		
-	public class SerialClient (GUI gui, String ip) {
+	public SerialClient (GUI gui, String ip) {
 		
 		g = gui;
-		
-		SerialClient(Control c) {
-			super(c);
-		}
-		
+								
 		try {
 			socket = new Socket(ip, 10007);
 
@@ -42,9 +38,9 @@ public class SerialClient implements ICommand {
 		}
 
 		try {
-			IGmSt = (GameState) in.readObject();
-			//ctrl.clickReceived(Gms);
-			g.onNewGamState(IGmSt);
+			GmSt = (GameState) in.readObject();
+			//ctrl.clickReceived(Gmst);
+			g.onNewGameState(GmSt);
 		} catch (Exception ex) {
 			System.out.println(ex.getMessage());
 			System.err.println("Server disconnected!");
@@ -54,31 +50,29 @@ public class SerialClient implements ICommand {
 
 
 		disconnect();
+				
 		
+	}
 
-		
-		@Override
-		void disconnect() {
-			try {
-				if (out != null)
-					out.close();
-				if (in != null)
-					in.close();
-				if (socket != null)
-					socket.close();
-			} catch (IOException ex) {
-				System.err.println("Error while closing conn.");
-			}
+	private void disconnect() {
+		try {
+			if (out != null)
+				out.close();
+			if (in != null)
+				in.close();
+			if (socket != null)
+				socket.close();
+		} catch (IOException ex) {
+			System.err.println("Error while closing conn.");
 		}
 	}
 
 	@Override
-	public void onNewGameState(Command c) {
-		    SerialClient.send(c)
+	public void onCommand(Command c) {
+		    send(c);
 	}
 	
-	@Override
-	void send(Command comm) {
+	private void send(Command comm) {
 		if (out == null)
 			return;
 		//System.out.println("Sending point: " + p + " to Server");
@@ -90,5 +84,5 @@ public class SerialClient implements ICommand {
 		}
 	}
 
-
+	
 }
