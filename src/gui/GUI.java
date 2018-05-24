@@ -4,6 +4,7 @@ import common.*;
 import common.Command.KeyboardSetting;
 import common.GameState.FieldType;
 import logic.Logic;
+import network.Client;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -136,6 +137,11 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
         JMenuItem menuItem = new JMenuItem("Client");
         menuItem.addActionListener(e -> {
+            String ip = JOptionPane.showInputDialog("Please provide the server IP address");
+            this.logic = new Client(this, ip);
+            drawPanel.setVisible(true);
+            gameInProgress = true;
+            startTime = System.currentTimeMillis();
         });
         menu.add(menuItem);
 
