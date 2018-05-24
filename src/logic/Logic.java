@@ -447,7 +447,13 @@ public class Logic implements ICommand {
     	mapDynamic.addAll(crates);
 		animationInProgress = true;
 		g.onNewGameState(new GameState(GameState.GameStateType.MOVEMENTS, numberOfSteps));
+		if(network) {
+			s.onNewGameState(new GameState(GameState.GameStateType.MOVEMENTS, numberOfSteps));
+ 		}
 		g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, mapDynamic));
+		if(network) {
+			s.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, mapDynamic));
+ 		}
     }
 
     private void moveCrate(int playerIndex, Coordinate dir) {
