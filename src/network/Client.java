@@ -12,18 +12,18 @@ import common.GameState;
 import common.ICommand;
 import common.IGameState;
 
-public class SerialClient implements ICommand {
+public class Client implements ICommand {
     private IGameState g;
 	private GameState GmSt;
 	private Socket socket = null;
 	private ObjectOutputStream out = null;
 	private ObjectInputStream in = null;
 
-		
-	public SerialClient (GUI gui, String ip) {
-		
+
+	public Client (GUI gui, String ip) {
+
 		g = gui;
-								
+
 		try {
 			socket = new Socket(ip, 10007);
 
@@ -50,8 +50,8 @@ public class SerialClient implements ICommand {
 
 
 		disconnect();
-				
-		
+
+
 	}
 
 	private void disconnect() {
@@ -71,7 +71,7 @@ public class SerialClient implements ICommand {
 	public void onCommand(Command c) {
 		    send(c);
 	}
-	
+
 	private void send(Command comm) {
 		if (out == null)
 			return;
@@ -84,5 +84,5 @@ public class SerialClient implements ICommand {
 		}
 	}
 
-	
+
 }
