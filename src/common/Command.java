@@ -8,7 +8,14 @@ public class Command implements Serializable {
     public KeyEvent lastKeyPressed;
     public KeyboardSetting player1;
     public KeyboardSetting player2;
+    public boolean fromNetwork = false;
 
+    public Command(CommandType command, KeyEvent lastKeyPressed, boolean fromNetwork) {
+        this.command = command;
+        this.lastKeyPressed = lastKeyPressed;
+        this.fromNetwork = fromNetwork;
+    }
+    
     public Command(CommandType command, KeyEvent lastKeyPressed) {
         this.command = command;
         this.lastKeyPressed = lastKeyPressed;
