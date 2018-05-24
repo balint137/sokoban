@@ -31,6 +31,8 @@ public class Server implements IGameState  {
 		disconnect();
 		try {
 			serverSocket = new ServerSocket(10007);
+			Thread rec = new Thread(new ReceiverThread());
+				rec.start();
 		} catch (IOException e) {
 			System.err.println("Could not listen on port: 10007.");
 		}
