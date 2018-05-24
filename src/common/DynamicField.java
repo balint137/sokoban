@@ -1,6 +1,8 @@
 package common;
 
-public class DynamicField {
+import java.io.Serializable;
+
+public class DynamicField implements Serializable {
     public GameState.FieldType type;
     public Coordinate actual;
     public Coordinate delta;
