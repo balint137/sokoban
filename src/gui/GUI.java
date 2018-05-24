@@ -113,12 +113,12 @@ public class GUI extends JFrame implements IGameState, KeyListener {
     }
 
     private void ReadResourceImages() throws IOException {
-        final BufferedImage crateImage = ImageIO.read(new File("resources/crate.png"));
-        final BufferedImage groundImage = ImageIO.read(new File("resources/ground.png"));
-        final BufferedImage playerImage = ImageIO.read(new File("resources/player.png"));
-        final BufferedImage player2Image = ImageIO.read(new File("resources/player2.png"));
-        final BufferedImage targetImage = ImageIO.read(new File("resources/target.png"));
-        final BufferedImage wallImage = ImageIO.read(new File("resources/wall.png"));
+        final BufferedImage crateImage = ImageIO.read(getClass().getResourceAsStream("/crate.png"));
+        final BufferedImage groundImage = ImageIO.read(getClass().getResourceAsStream("/ground.png"));
+        final BufferedImage playerImage = ImageIO.read(getClass().getResourceAsStream("/player.png"));
+        final BufferedImage player2Image = ImageIO.read(getClass().getResourceAsStream("/player2.png"));
+        final BufferedImage targetImage = ImageIO.read(getClass().getResourceAsStream("/target.png"));
+        final BufferedImage wallImage = ImageIO.read(getClass().getResourceAsStream("/wall.png"));
 
         fieldToImage.put(FieldType.CRATE, crateImage);
         fieldToImage.put(FieldType.GROUND, groundImage);
