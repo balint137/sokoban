@@ -9,12 +9,6 @@ public class Command implements Serializable {
     public KeyboardSetting player1;
     public KeyboardSetting player2;
     public boolean fromNetwork = false;
-
-    public Command(CommandType command, KeyEvent lastKeyPressed, boolean fromNetwork) {
-        this.command = command;
-        this.lastKeyPressed = lastKeyPressed;
-        this.fromNetwork = fromNetwork;
-    }
     
     public Command(CommandType command, KeyEvent lastKeyPressed) {
         this.command = command;
@@ -31,11 +25,6 @@ public class Command implements Serializable {
         this.player2 = player2;
     }
     
-    public Command(CommandType command, KeyboardSetting player2, boolean fromNetwork) {
-        this.command = command;
-        this.player2 = player2;
-        this.fromNetwork = fromNetwork;
-    }
 
     public enum CommandType {KEY_PRESSED, ANIMATION_DONE, KEY_MAP}
 
