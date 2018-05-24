@@ -69,6 +69,7 @@ public class Client implements ICommand {
 
 	@Override
 	public void onCommand(Command c) {
+		c.fromNetwork = true;
 		    send(c);
 	}
 
