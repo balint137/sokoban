@@ -13,20 +13,21 @@ import common.Command;
 import common.GameState;
 import common.ICommand;
 import common.IGameState;
+import logic.Logic;
 
-public class SerialServer implements IGameState  {
-    	
+public class Server implements IGameState  {
+
 	private ICommand g;
-	private Command Cmd;	
+	private Command Cmd;
 	private ServerSocket serverSocket = null;
 	private Socket clientSocket = null;
 	private ObjectOutputStream out = null;
 	private ObjectInputStream in = null;
-	
-   	public SerialServer (GUI gui){
 
-		g = gui;
-			
+   	public Server (Logic logic){
+
+		g = logic;
+
 		disconnect();
 		try {
 			serverSocket = new ServerSocket(10007);
@@ -64,9 +65,9 @@ public class SerialServer implements IGameState  {
 		} finally {
 			disconnect();
 		}
-			
+
 	}
-    
+
    	void disconnect() {
 		try {
 			if (out != null)
@@ -78,17 +79,17 @@ public class SerialServer implements IGameState  {
 			if (serverSocket != null)
 				serverSocket.close();
 		} catch (IOException ex) {
-			Logger.getLogger(SerialServer.class.getName()).log(Level.SEVERE,
+			Logger.getLogger(Server.class.getName()).log(Level.SEVERE,
 					null, ex);
 		}
 	}
-   	
+
 	@Override
 	public void onNewGameState(GameState g) {
 		send(g);
 	}
-	
-	
+
+
 	private void send(GameState Gs){
 		if (out == null)
 			return;
