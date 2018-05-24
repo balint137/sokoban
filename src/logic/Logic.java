@@ -4,6 +4,7 @@ package logic;
 import common.*;
 import common.GameState.FieldType;
 import gui.GUI;
+import network.Server;
 
 import java.io.*;
 import java.util.*;
@@ -14,6 +15,8 @@ import static gui.GUI.MAX_MAP_SIZE;
 
 public class Logic implements ICommand {
     private IGameState g;
+    private IGameState s;
+    private boolean network;
     private boolean animationInProgress;
 
     private FieldType[][] mapStatic;
@@ -30,6 +33,7 @@ public class Logic implements ICommand {
     private int numberOfSteps;
     private long startTime;
     private long finishTime;
+   
 
     public Logic(GUI gui, String mapFilePath, boolean network, String name1, String name2, long startTime){
 
@@ -39,6 +43,10 @@ public class Logic implements ICommand {
         animationInProgress = false;
 
         g = gui;
+        this.network = network;
+        if(network) {
+        	s = new Server(this);
+        }
 
         mapStatic = new FieldType[MAX_MAP_SIZE][MAX_MAP_SIZE];
         crates = new ArrayList<>();
@@ -55,6 +63,10 @@ public class Logic implements ICommand {
 			loadMap(mapFilePath);
 			g.onNewGameState(new GameState(GameState.GameStateType.STATIC_FIELDS, mapStatic));
 			g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, mapDynamic));
+			if(network) {
+				s.onNewGameState(new GameState(GameState.GameStateType.STATIC_FIELDS, mapStatic));
+				s.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, mapDynamic));
+			}
 			mapDynamic.clear();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -130,21 +142,46 @@ public class Logic implements ICommand {
         		 	if(checkForVictory()) {
         		 		finishTime = System.currentTimeMillis() - startTime;
         		 		g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.WIN));
+        		 		if(network) {
+        		 			s.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.WIN));
+        		 		}
         		 	}
         		 	if(checkForLoss()) {
         		 		g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.LOSE));
+        		 		if(network) {
+        		 			s.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.LOSE));
+        		 		}
         		 	}
     			}
     			break;
     		case KEY_MAP:
-    			if(c.player1!=null)p1Keyboard = c.player1;
-    			if(c.player2!=null)p2Keyboard = c.player2;
+    			if(network) {
+    				if(c.fromNetwork) {
+    	    			if(c.player2!=null)p2Keyboard = c.player2;
+    				}
+    				else {
+    					if(c.player1!=null)p1Keyboard = c.player1;
+    				}
+    			}
+    			else {
+        			if(c.player1!=null)p1Keyboard = c.player1;
+        			if(c.player2!=null)p2Keyboard = c.player2;
+    			}
     		}
     	}
     	commandsToExecute.clear();
     }
 
     private void processKeyPress(Command c) {
+    	if(network) {
+    		processKeyPressOnline(c);
+    	}
+    	else {
+    		processKeyPressOffline(c);
+    	}
+    }
+
+    private void processKeyPressOffline(Command c) {
     	switch (c.lastKeyPressed.getKeyCode()) {
 		case 87: //W
 			if (p1Keyboard == Command.KeyboardSetting.WASD) {
@@ -246,7 +283,140 @@ public class Logic implements ICommand {
 			break;
     	}
     }
-
+    
+    private void processKeyPressOnline(Command c) {
+    	if(c.fromNetwork) {
+    		switch (c.lastKeyPressed.getKeyCode()) {
+    		case 87: //W
+    			if (p2Keyboard == Command.KeyboardSetting.WASD) {
+    				move(GameState.FieldType.PLAYER2, new Coordinate(0,-1));
+    			}
+    			break;
+    		case 65: //A
+    			if (p2Keyboard == Command.KeyboardSetting.WASD) {
+    				move(GameState.FieldType.PLAYER2, new Coordinate(-1, 0));
+    			}
+    		case 83: //S
+    			if (p2Keyboard == Command.KeyboardSetting.WASD) {
+    				move(GameState.FieldType.PLAYER2, new Coordinate(0,1));
+    			}
+    			break;
+    		case 68: //D
+    			if (p2Keyboard == Command.KeyboardSetting.WASD) {
+    				move(GameState.FieldType.PLAYER2, new Coordinate(1,0));
+    			}
+    			break;
+    		case 73: //I
+    			if (p2Keyboard == Command.KeyboardSetting.IJKL) {
+    				move(GameState.FieldType.PLAYER2, new Coordinate(0,-1));
+    			}
+    			break;
+    		case 74: //J
+    			if (p2Keyboard == Command.KeyboardSetting.IJKL) {
+    				move(GameState.FieldType.PLAYER2, new Coordinate(-1, 0));
+    			}
+    			break;
+    		case 75: //K
+    			if (p2Keyboard == Command.KeyboardSetting.IJKL) {
+    				move(GameState.FieldType.PLAYER2, new Coordinate(0,1));
+    			}
+    			break;
+    		case 76: //L
+    			if (p2Keyboard == Command.KeyboardSetting.IJKL) {
+    				move(GameState.FieldType.PLAYER2, new Coordinate(1,0));
+    			}
+    			break;
+    		case 38: //UP
+    			if (p2Keyboard == Command.KeyboardSetting.ARROWS) {
+    				move(GameState.FieldType.PLAYER2, new Coordinate(0,-1));
+    			}
+    			break;
+    		case 37: //LEFT
+    			if (p2Keyboard == Command.KeyboardSetting.ARROWS) {
+    				move(GameState.FieldType.PLAYER2, new Coordinate(-1, 0));
+    			}
+    			break;
+    		case 40: //DOWN
+    			if (p2Keyboard == Command.KeyboardSetting.ARROWS) {
+    				move(GameState.FieldType.PLAYER2, new Coordinate(0,1));
+    			}
+    			break;
+    		case 39: //RIGHT
+    			if (p2Keyboard == Command.KeyboardSetting.ARROWS) {
+    				move(GameState.FieldType.PLAYER2, new Coordinate(1,0));
+    			}
+    			break;
+    		default:
+    			break;
+        	}
+    	}
+    	else {
+    		switch (c.lastKeyPressed.getKeyCode()) {
+    		case 87: //W
+    			if (p1Keyboard == Command.KeyboardSetting.WASD) {
+    				move(GameState.FieldType.PLAYER1, new Coordinate(0,-1));
+    			}
+    			break;
+    		case 65: //A
+    			if (p1Keyboard == Command.KeyboardSetting.WASD) {
+    				move(GameState.FieldType.PLAYER1, new Coordinate(-1, 0));
+    			}
+    		case 83: //S
+    			if (p1Keyboard == Command.KeyboardSetting.WASD) {
+    				move(GameState.FieldType.PLAYER1, new Coordinate(0,1));
+    			}
+    			break;
+    		case 68: //D
+    			if (p1Keyboard == Command.KeyboardSetting.WASD) {
+    				move(GameState.FieldType.PLAYER1, new Coordinate(1,0));
+    			}
+    			break;
+    		case 73: //I
+    			if (p1Keyboard == Command.KeyboardSetting.IJKL) {
+    				move(GameState.FieldType.PLAYER1, new Coordinate(0,-1));
+    			}
+    			break;
+    		case 74: //J
+    			if (p1Keyboard == Command.KeyboardSetting.IJKL) {
+    				move(GameState.FieldType.PLAYER1, new Coordinate(-1, 0));
+    			}
+    			break;
+    		case 75: //K
+    			if (p1Keyboard == Command.KeyboardSetting.IJKL) {
+    				move(GameState.FieldType.PLAYER1, new Coordinate(0,1));
+    			}
+    			break;
+    		case 76: //L
+    			if (p1Keyboard == Command.KeyboardSetting.IJKL) {
+    				move(GameState.FieldType.PLAYER1, new Coordinate(1,0));
+    			}
+    			break;
+    		case 38: //UP
+    			if (p1Keyboard == Command.KeyboardSetting.ARROWS) {
+    				move(GameState.FieldType.PLAYER1, new Coordinate(0,-1));
+    			}
+    			break;
+    		case 37: //LEFT
+    			if (p1Keyboard == Command.KeyboardSetting.ARROWS) {
+    				move(GameState.FieldType.PLAYER1, new Coordinate(-1, 0));
+    			}
+    			break;
+    		case 40: //DOWN
+    			if (p1Keyboard == Command.KeyboardSetting.ARROWS) {
+    				move(GameState.FieldType.PLAYER1, new Coordinate(0,1));
+    			}
+    			break;
+    		case 39: //RIGHT
+    			if (p1Keyboard == Command.KeyboardSetting.ARROWS) {
+    				move(GameState.FieldType.PLAYER1, new Coordinate(1,0));
+    			}
+    			break;
+    		default:
+    			break;
+        	}
+    	}
+    }
+    
     private void move(FieldType player, Coordinate dir) {
     	int playerIndex = 0;
     	for (int i=0;i<players.size(); i++) {
