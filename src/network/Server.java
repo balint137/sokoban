@@ -36,36 +36,42 @@ public class Server implements IGameState  {
 		}
 
 
-		try {
-			System.out.println("Waiting for Client");
-			clientSocket = serverSocket.accept();
-			System.out.println("Client connected.");
-		} catch (IOException e) {
-			System.err.println("Accept failed.");
-			disconnect();
-			return;
-		}
+		private class ReceiverThread implements Runnable {
 
-		try {
-			out = new ObjectOutputStream(clientSocket.getOutputStream());
-			in = new ObjectInputStream(clientSocket.getInputStream());
-			out.flush();
-		} catch (IOException e) {
-			System.err.println("Error while getting streams.");
-			disconnect();
-			return;
-		}
+			public void run() {
+				try {
+					System.out.println("Waiting for Client");
+					clientSocket = serverSocket.accept();
+					System.out.println("Client connected.");
+				} catch (IOException e) {
+					System.err.println("Accept failed.");
+					disconnect();
+					return;
+				}
 
-		try {
-			Cmd = (Command) in.readObject();
-			g.onCommand(Cmd);
-		} catch (Exception ex) {
-			System.out.println(ex.getMessage());
-			System.err.println("Client disconnected!");
-		} finally {
-			disconnect();
-		}
+				try {
+					out = new ObjectOutputStream(clientSocket.getOutputStream());
+					in = new ObjectInputStream(clientSocket.getInputStream());
+					out.flush();
+				} catch (IOException e) {
+					System.err.println("Error while getting streams.");
+					disconnect();
+					return;
+				}
 
+				try {
+					while (true) {
+						Cmd = (Command) in.readObject();
+						g.onCommand(Cmd);
+					}
+				} catch (Exception ex) {
+					System.out.println(ex.getMessage());
+					System.err.println("Client disconnected!");
+				} finally {
+					disconnect();
+				}
+			}
+		}
 	}
 
    	void disconnect() {
