@@ -26,6 +26,8 @@ public class Client implements ICommand {
 
 		try {
 			socket = new Socket(ip, 10007);
+			Thread rec = new Thread(new ReceiverThread());
+				rec.start();
 
 			out = new ObjectOutputStream(socket.getOutputStream());
 			in = new ObjectInputStream(socket.getInputStream());
