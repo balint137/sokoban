@@ -33,7 +33,11 @@ public class Logic implements ICommand {
     private int numberOfSteps;
     private long startTime;
     private long finishTime;
-   
+    
+    private String highscores;
+    private int minSteps;
+    private String name1;
+    private String name2;
 
     public Logic(GUI gui, String mapFilePath, boolean network, String name1, String name2, long startTime){
 
@@ -47,7 +51,10 @@ public class Logic implements ICommand {
         if(network) {
         	s = new Server(this);
         }
-
+        
+        this.name1 = name1;
+        this.name2 = name2;
+        
         mapStatic = new FieldType[MAX_MAP_SIZE][MAX_MAP_SIZE];
         crates = new ArrayList<>();
         players = new ArrayList<>();
@@ -88,37 +95,39 @@ public class Logic implements ICommand {
         File map = new File(filename);
         Charset encoding = Charset.defaultCharset();
         try (InputStream in = new FileInputStream(map);
-        		Reader reader = new InputStreamReader(in, encoding)) {
+        		Reader reader = new InputStreamReader(in, encoding);
+        		BufferedReader br = new BufferedReader(reader)) {
         	int r, i = 0;
-        	while((r = reader.read()) != -1) {
+        	while((r = reader.read()) != -1 && i<MAX_MAP_SIZE*MAX_MAP_SIZE) {
         		switch ((char)r) {
         		case '-':
-        			mapStatic[i%10][i/10] = FieldType.GROUND;
+        			mapStatic[i%MAX_MAP_SIZE][i/MAX_MAP_SIZE] = FieldType.GROUND;
         			break;
         		case '#':
-        			mapStatic[i%10][i/10] = FieldType.WALL;
+        			mapStatic[i%MAX_MAP_SIZE][i/MAX_MAP_SIZE] = FieldType.WALL;
         			break;
         		case 'X':
-        			mapStatic[i%10][i/10] = FieldType.TARGET;
+        			mapStatic[i%MAX_MAP_SIZE][i/MAX_MAP_SIZE] = FieldType.TARGET;
         			break;
         		case '0':
-        			crates.add(new DynamicField(FieldType.CRATE, new Coordinate(i%10, i/10)));
+        			crates.add(new DynamicField(FieldType.CRATE, new Coordinate(i%MAX_MAP_SIZE, i/MAX_MAP_SIZE)));
         			break;
         		case '1':
-        			players.add(new DynamicField(FieldType.PLAYER1, new Coordinate(i%10, i/10)));
+        			players.add(new DynamicField(FieldType.PLAYER1, new Coordinate(i%MAX_MAP_SIZE, i/MAX_MAP_SIZE)));
         			break;
         		case '2':
-        			players.add(new DynamicField(FieldType.PLAYER2, new Coordinate(i%10, i/10)));
+        			players.add(new DynamicField(FieldType.PLAYER2, new Coordinate(i%MAX_MAP_SIZE, i/MAX_MAP_SIZE)));
         			break;
         		case '\n':
         			i--;
         			break;
     			default:
-    				mapStatic[i/10][i%10] = FieldType.GROUND;
         			break;
         		}
         		i++;
         	}
+        	highscores = br.readLine();
+        	g.onNewGameState(new GameState(GameState.GameStateType.HIGHSCORES, highscores));
         	mapDynamic.addAll(players);
         	mapDynamic.addAll(crates);
         }
