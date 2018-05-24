@@ -203,8 +203,8 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
         menuBar.add(menu);
 
-        menu = new JMenu("Keyboard settings");
-        menuItem = new JMenuItem("Player 1");
+        menu = new JMenu("Options");
+        menuItem = new JMenuItem("Player 1 keyboard settings");
         menuItem.addActionListener(e -> {
             Object selected = JOptionPane.showInputDialog(this, "Player 1 (local)",
                     "Player 1 keyboard settings", JOptionPane.DEFAULT_OPTION, null, KeyboardSetting.values(), player1KeyboardSetting);
@@ -223,7 +223,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         });
         menu.add(menuItem);
 
-        menuItem = new JMenuItem("Player 2");
+        menuItem = new JMenuItem("Player 2 keyboard settings");
         menuItem.addActionListener(e -> {
             Object selected = JOptionPane.showInputDialog(this, "Player 2 (local multiplayer)",
                     "Player 2 keyboard settings", JOptionPane.DEFAULT_OPTION, null, KeyboardSetting.values(), player2KeyboardSetting);
@@ -242,11 +242,11 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         });
         menu.add(menuItem);
 
-        menuBar.add(menu);
-
         menuItem = new JMenuItem("Highscores");
         menuItem.addActionListener(e -> JOptionPane.showMessageDialog(this, highscores));
-        menuBar.add(menuItem);
+        menu.add(menuItem);
+
+        menuBar.add(menu);
 
         menuItem = new JMenuItem("Exit");
         menuItem.addActionListener(e -> System.exit(0));

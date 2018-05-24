@@ -24,19 +24,19 @@ public class Server implements IGameState  {
 	private ObjectOutputStream out = null;
 	private ObjectInputStream in = null;
 
-   	public Server (Logic logic){
+   	public Server (Logic logic) {
 
-		g = logic;
+        g = logic;
 
-		disconnect();
-		try {
-			serverSocket = new ServerSocket(10007);
-			Thread rec = new Thread(new ReceiverThread());
-				rec.start();
-		} catch (IOException e) {
-			System.err.println("Could not listen on port: 10007.");
-		}
-
+        disconnect();
+        try {
+            serverSocket = new ServerSocket(10007);
+            Thread rec = new Thread(new ReceiverThread());
+            rec.start();
+        } catch (IOException e) {
+            System.err.println("Could not listen on port: 10007.");
+        }
+    }
 
 		private class ReceiverThread implements Runnable {
 
@@ -74,7 +74,7 @@ public class Server implements IGameState  {
 				}
 			}
 		}
-	}
+
 
    	void disconnect() {
 		try {

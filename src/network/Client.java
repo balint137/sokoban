@@ -26,18 +26,19 @@ public class Client implements ICommand {
 
 		try {
 			socket = new Socket(ip, 10007);
-			Thread rec = new Thread(new ReceiverThread());
-				rec.start();
 
 			out = new ObjectOutputStream(socket.getOutputStream());
 			in = new ObjectInputStream(socket.getInputStream());
 			out.flush();
+			Thread rec = new Thread(new ReceiverThread());
+			rec.start();
 		} catch (UnknownHostException e) {
 			System.err.println("Don't know about host");
 		} catch (IOException e) {
 			System.err.println("Couldn't get I/O for the connection. ");
 			JOptionPane.showMessageDialog(null, "Cannot connect to server!");
 		}
+	}
 
 		private class ReceiverThread implements Runnable {
 
@@ -47,7 +48,7 @@ public class Client implements ICommand {
 					while (true) {
 						GmSt = (GameState) in.readObject();
 						//ctrl.clickReceived(Gms);
-						g.onNewGamState(GmSt);
+						g.onNewGameState(GmSt);
 					}
 				} catch (Exception ex) {
 					System.out.println(ex.getMessage());
@@ -58,8 +59,6 @@ public class Client implements ICommand {
 			}
 
 		}
-
-	}
 
 	private void disconnect() {
 		try {
