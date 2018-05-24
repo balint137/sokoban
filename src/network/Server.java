@@ -24,21 +24,12 @@ public class Server implements IGameState  {
 	private ObjectOutputStream out = null;
 	private ObjectInputStream in = null;
 
-   	public Server (Logic logic) {
+   	public Server (Logic logic){
 
         g = logic;
 
-        disconnect();
-        try {
-            serverSocket = new ServerSocket(10007);
-            Thread rec = new Thread(new ReceiverThread());
-            rec.start();
-        } catch (IOException e) {
-            System.err.println("Could not listen on port: 10007.");
-        }
-    }
+        class ReceiverThread implements Runnable {
 
-		private class ReceiverThread implements Runnable {
 
 			public void run() {
 				try {
@@ -72,11 +63,22 @@ public class Server implements IGameState  {
 				} finally {
 					disconnect();
 				}
-			}
-		}
+
+	        }
 
 
-   	void disconnect() {
+
+	}try {
+	            serverSocket = new ServerSocket(10007);
+	            Thread rec = new Thread(new ReceiverThread());
+	            rec.start();
+	        } catch (IOException e) {
+	            System.err.println("Could not listen on port: 10007.");
+	        }
+   	}
+
+
+  	void disconnect() {
 		try {
 			if (out != null)
 				out.close();
@@ -101,7 +103,7 @@ public class Server implements IGameState  {
 	private void send(GameState Gs){
 		if (out == null)
 			return;
-		//System.out.println("Sending point: " + p + " to Client");
+		System.out.println("Send command to client");
 		try {
 			out.writeObject(Gs);
 			out.flush();
@@ -109,4 +111,4 @@ public class Server implements IGameState  {
 			System.err.println("Send error.");
 		}
 	}
-}
+}//valami

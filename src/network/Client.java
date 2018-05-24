@@ -24,6 +24,26 @@ public class Client implements ICommand {
 
 		g = gui;
 
+		class ReceiverThread implements Runnable {
+
+			public void run() {
+				//System.out.println("Waiting for points...");
+				try {
+					while (true) {
+						GmSt = (GameState) in.readObject();
+						//ctrl.clickReceived(Gms);
+						g.onNewGameState(GmSt);
+					}
+				} catch (Exception ex) {
+					System.out.println(ex.getMessage());
+					System.err.println("Server disconnected!");
+				} finally {
+					disconnect();
+				}
+			}
+
+		}
+		
 		try {
 			socket = new Socket(ip, 10007);
 
@@ -40,7 +60,13 @@ public class Client implements ICommand {
 		}
 	}
 
-		private class ReceiverThread implements Runnable {
+
+
+	
+
+	
+
+		class ReceiverThread implements Runnable {
 
 			public void run() {
 				//System.out.println("Waiting for points...");
@@ -92,4 +118,4 @@ public class Client implements ICommand {
 	}
 
 
-}
+}//valami
