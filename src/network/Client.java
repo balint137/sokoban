@@ -37,20 +37,25 @@ public class Client implements ICommand {
 			JOptionPane.showMessageDialog(null, "Cannot connect to server!");
 		}
 
-		try {
-			GmSt = (GameState) in.readObject();
-			//ctrl.clickReceived(Gmst);
-			g.onNewGameState(GmSt);
-		} catch (Exception ex) {
-			System.out.println(ex.getMessage());
-			System.err.println("Server disconnected!");
-		} finally {
-			disconnect();
+		private class ReceiverThread implements Runnable {
+
+			public void run() {
+				//System.out.println("Waiting for points...");
+				try {
+					while (true) {
+						GmSt = (GameState) in.readObject();
+						//ctrl.clickReceived(Gms);
+						g.onNewGamState(GmSt);
+					}
+				} catch (Exception ex) {
+					System.out.println(ex.getMessage());
+					System.err.println("Server disconnected!");
+				} finally {
+					disconnect();
+				}
+			}
+
 		}
-
-
-		disconnect();
-
 
 	}
 
