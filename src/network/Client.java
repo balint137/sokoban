@@ -43,9 +43,9 @@ public class Client implements ICommand {
 				//System.out.println("Waiting for points...");
 				try {
 					while (true) {
-						IGmSt = (GameState) in.readObject();
+						GmSt = (GameState) in.readObject();
 						//ctrl.clickReceived(Gms);
-						g.onNewGamState(IGmSt);
+						g.onNewGamState(GmSt);
 					}
 				} catch (Exception ex) {
 					System.out.println(ex.getMessage());
