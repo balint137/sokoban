@@ -54,7 +54,9 @@ public class Server implements IGameState  {
 
 				try {
 					while (true) {
+						System.out.println("Send");
 						Cmd = (Command) in.readObject();
+						System.out.println("Send");
 						g.onCommand(Cmd);
 					}
 				} catch (Exception ex) {
@@ -105,7 +107,9 @@ public class Server implements IGameState  {
 			return;
 		System.out.println("Send command to client");
 		try {
+			System.out.println("Send command to client2");
 			out.writeObject(Gs);
+			System.out.println("Send command to client3");
 			out.flush();
 		} catch (IOException ex) {
 			System.err.println("Send error.");

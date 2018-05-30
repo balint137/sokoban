@@ -108,9 +108,11 @@ public class Client implements ICommand {
 	private void send(Command comm) {
 		if (out == null)
 			return;
-		//System.out.println("Sending point: " + p + " to Server");
+		System.out.println("Send command to server");
 		try {
+			System.out.println("Send command to server2");
 			out.writeObject(comm);
+			System.out.println("Send command to server3");
 			out.flush();
 		} catch (IOException ex) {
 			System.err.println("Send error.");

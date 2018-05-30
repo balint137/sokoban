@@ -16,6 +16,7 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
@@ -344,7 +345,6 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 }
                 break;
             case HIGHSCORES:
-                highscores = g.highscores;
                 break;
         }
     }
@@ -395,7 +395,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         }
     }
 
-    class DynamicFieldAnimation {
+    class DynamicFieldAnimation implements Serializable{
         GameState.FieldType type;
         int x, y;
         int dx, dy;

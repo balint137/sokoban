@@ -2,7 +2,9 @@ package common;
 
 import static gui.GUI.MAX_MAP_SIZE;
 
-public class Coordinate {
+import java.io.Serializable;
+
+public class Coordinate implements Serializable {
     private int x, y;
 
     public Coordinate(int x, int y) {
