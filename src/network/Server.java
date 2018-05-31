@@ -24,6 +24,27 @@ public class Server implements IGameState {
 
         try {
             serverSocket = new ServerSocket(10007);
+            try {
+                System.out.println("Waiting for Client");
+                clientSocket = serverSocket.accept();
+                System.out.println("Client connected.");
+            } catch (Exception e) {
+                System.err.println("Accept failed.");
+                disconnect();
+                return;
+            }
+
+            try {
+                out = new ObjectOutputStream(clientSocket.getOutputStream());
+                in = new ObjectInputStream(clientSocket.getInputStream());
+                out.flush();
+                System.out.println("I/O streams OK.");
+            } catch (Exception e) {
+                System.err.println("Error while getting streams.");
+                disconnect();
+                return;
+            }
+
             Thread rec = new Thread(new ReceiverThread());
             rec.start();
         } catch (IOException e) {
@@ -69,27 +90,6 @@ public class Server implements IGameState {
 
     class ReceiverThread implements Runnable {
         public void run() {
-            try {
-                System.out.println("Waiting for Client");
-                clientSocket = serverSocket.accept();
-                System.out.println("Client connected.");
-            } catch (Exception e) {
-                System.err.println("Accept failed.");
-                disconnect();
-                return;
-            }
-
-            try {
-                out = new ObjectOutputStream(clientSocket.getOutputStream());
-                in = new ObjectInputStream(clientSocket.getInputStream());
-                out.flush();
-                System.out.println("I/O streams OK.");
-            } catch (Exception e) {
-                System.err.println("Error while getting streams.");
-                disconnect();
-                return;
-            }
-
             try {
                 while (true) {
                     System.out.println("Waiting for command...");
