@@ -1,118 +1,110 @@
 package network;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import gui.GUI;
-
 import common.Command;
 import common.GameState;
 import common.ICommand;
 import common.IGameState;
 import logic.Logic;
 
-public class Server implements IGameState  {
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 
-	private ICommand g;
-	private Command Cmd;
-	private ServerSocket serverSocket = null;
-	private Socket clientSocket = null;
-	private ObjectOutputStream out = null;
-	private ObjectInputStream in = null;
+public class Server implements IGameState {
+    private ICommand l;
+    private ServerSocket serverSocket = null;
+    private Socket clientSocket = null;
+    private ObjectOutputStream out = null;
+    private ObjectInputStream in = null;
 
-   	public Server (Logic logic){
+    public Server(Logic logic) {
+        l = logic;
 
-        g = logic;
+        try {
+            serverSocket = new ServerSocket(10007);
+            Thread rec = new Thread(new ReceiverThread());
+            rec.start();
+        } catch (IOException e) {
+            System.err.println("Could not listen on port: 10007.");
+        }
+    }
 
-        class ReceiverThread implements Runnable {
+    void disconnect() {
+        try {
+            if (out != null)
+                out.close();
+            if (in != null)
+                in.close();
+            if (clientSocket != null)
+                clientSocket.close();
+            if (serverSocket != null)
+                serverSocket.close();
+        } catch (Exception e) {
+            System.out.println("Error closing server");
+            System.out.println(e.getMessage());
+        }
+    }
 
+    @Override
+    public void onNewGameState(GameState g) {
+        send(g);
+    }
 
-			public void run() {
-				try {
-					System.out.println("Waiting for Client");
-					clientSocket = serverSocket.accept();
-					System.out.println("Client connected.");
-				} catch (IOException e) {
-					System.err.println("Accept failed.");
-					disconnect();
-					return;
-				}
+    private void send(GameState g) {
+        if (out == null)
+            return;
+        try {
+            System.out.println("Sending gamestate to client: " + g.type.toString());
+            out.writeObject(g);
+            System.out.println("Object write done.");
+            out.flush();
+            System.out.println("Send done.");
+        } catch (Exception e) {
+            System.err.println("Send error.");
+            System.out.println(e.getMessage());
+        }
+    }
 
-				try {
-					out = new ObjectOutputStream(clientSocket.getOutputStream());
-					in = new ObjectInputStream(clientSocket.getInputStream());
-					out.flush();
-				} catch (IOException e) {
-					System.err.println("Error while getting streams.");
-					disconnect();
-					return;
-				}
+    class ReceiverThread implements Runnable {
+        public void run() {
+            try {
+                System.out.println("Waiting for Client");
+                clientSocket = serverSocket.accept();
+                System.out.println("Client connected.");
+            } catch (Exception e) {
+                System.err.println("Accept failed.");
+                disconnect();
+                return;
+            }
 
-				try {
-					while (true) {
-						System.out.println("Send");
-						Cmd = (Command) in.readObject();
-						System.out.println("Send");
-						g.onCommand(Cmd);
-					}
-				} catch (Exception ex) {
-					System.out.println(ex.getMessage());
-					System.err.println("Client disconnected!");
-				} finally {
-					disconnect();
-				}
+            try {
+                out = new ObjectOutputStream(clientSocket.getOutputStream());
+                in = new ObjectInputStream(clientSocket.getInputStream());
+                out.flush();
+                System.out.println("I/O streams OK.");
+            } catch (Exception e) {
+                System.err.println("Error while getting streams.");
+                disconnect();
+                return;
+            }
 
-	        }
-
-
-
-	}try {
-	            serverSocket = new ServerSocket(10007);
-	            Thread rec = new Thread(new ReceiverThread());
-	            rec.start();
-	        } catch (IOException e) {
-	            System.err.println("Could not listen on port: 10007.");
-	        }
-   	}
-
-
-  	void disconnect() {
-		try {
-			if (out != null)
-				out.close();
-			if (in != null)
-				in.close();
-			if (clientSocket != null)
-				clientSocket.close();
-			if (serverSocket != null)
-				serverSocket.close();
-		} catch (IOException ex) {
-			Logger.getLogger(Server.class.getName()).log(Level.SEVERE,
-					null, ex);
-		}
-	}
-
-	@Override
-	public void onNewGameState(GameState g) {
-		send(g);
-	}
-
-
-	private void send(GameState Gs){
-		if (out == null)
-			return;
-		System.out.println("Send command to client");
-		try {
-			System.out.println("Send command to client2");
-			out.writeObject(Gs);
-			System.out.println("Send command to client3");
-			out.flush();
-		} catch (IOException ex) {
-			System.err.println("Send error.");
-		}
-	}
-}//valami
+            try {
+                while (true) {
+                    System.out.println("Waiting for command...");
+                    Command cmd = (Command) in.readObject();
+                    System.out.println("Command received: " + cmd.command.toString());
+                    l.onCommand(cmd);
+                    System.out.println("Command sent to logic.");
+                }
+            } catch (Exception e) {
+                System.out.println("Receiver exception");
+                System.out.println(e.getMessage());
+            } finally {
+                disconnect();
+                System.err.println("Client disconnected!");
+            }
+        }
+    }
+}
