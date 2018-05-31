@@ -302,7 +302,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         if (gameInProgress) {
-            logic.onCommand(new Command(Command.CommandType.KEY_PRESSED, e));
+            logic.onCommand(new Command(Command.CommandType.KEY_PRESSED, e.getKeyCode()));
         } else {
             JOptionPane.showMessageDialog(this, "Please start a new game!",
                     "End of game", JOptionPane.WARNING_MESSAGE);

@@ -33,7 +33,7 @@ public class Logic implements ICommand {
     private int numberOfSteps;
     private long startTime;
     private long finishTime;
-    
+
     private String highscores;
     private int minSteps;
     private String name1;
@@ -51,10 +51,10 @@ public class Logic implements ICommand {
         if(network) {
         	s = new Server(this);
         }
-        
+
         this.name1 = name1;
         this.name2 = name2;
-        
+
         mapStatic = new FieldType[MAX_MAP_SIZE][MAX_MAP_SIZE];
         crates = new ArrayList<>();
         players = new ArrayList<>();
@@ -191,7 +191,7 @@ public class Logic implements ICommand {
     }
 
     private void processKeyPressOffline(Command c) {
-    	switch (c.lastKeyPressed.getKeyCode()) {
+    	switch (c.lastKeyPressed) {
 		case 87: //W
 			if (p1Keyboard == Command.KeyboardSetting.WASD) {
 				move(GameState.FieldType.PLAYER1, new Coordinate(0,-1));
@@ -292,10 +292,10 @@ public class Logic implements ICommand {
 			break;
     	}
     }
-    
+
     private void processKeyPressOnline(Command c) {
     	if(c.fromNetwork) {
-    		switch (c.lastKeyPressed.getKeyCode()) {
+    		switch (c.lastKeyPressed) {
     		case 87: //W
     			if (p2Keyboard == Command.KeyboardSetting.WASD) {
     				move(GameState.FieldType.PLAYER2, new Coordinate(0,-1));
@@ -360,7 +360,7 @@ public class Logic implements ICommand {
         	}
     	}
     	else {
-    		switch (c.lastKeyPressed.getKeyCode()) {
+    		switch (c.lastKeyPressed) {
     		case 87: //W
     			if (p1Keyboard == Command.KeyboardSetting.WASD) {
     				move(GameState.FieldType.PLAYER1, new Coordinate(0,-1));
@@ -425,7 +425,7 @@ public class Logic implements ICommand {
         	}
     	}
     }
-    
+
     private void move(FieldType player, Coordinate dir) {
     	int playerIndex = 0;
     	for (int i=0;i<players.size(); i++) {

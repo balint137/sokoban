@@ -5,12 +5,12 @@ import java.io.Serializable;
 
 public class Command implements Serializable {
     public CommandType command;
-    public KeyEvent lastKeyPressed;
+    public int lastKeyPressed;
     public KeyboardSetting player1;
     public KeyboardSetting player2;
     public boolean fromNetwork = false;
-    
-    public Command(CommandType command, KeyEvent lastKeyPressed) {
+
+    public Command(CommandType command, int lastKeyPressed) {
         this.command = command;
         this.lastKeyPressed = lastKeyPressed;
     }
@@ -24,7 +24,7 @@ public class Command implements Serializable {
         this.player1 = player1;
         this.player2 = player2;
     }
-    
+
 
     public enum CommandType {KEY_PRESSED, ANIMATION_DONE, KEY_MAP}
 
