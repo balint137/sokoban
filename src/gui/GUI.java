@@ -22,6 +22,14 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Graphical interface implementation
+ * <p>
+ * The GUI class communicates with Logic or Client, using the ICommand interface.
+ * This class will listen for key presses, and notify the game logic.
+ *
+ * @author Balint Dobszay
+ */
 public class GUI extends JFrame implements IGameState, KeyListener {
     public static final int MAX_MAP_SIZE = 10;
     private boolean animationInProgress;
@@ -48,6 +56,12 @@ public class GUI extends JFrame implements IGameState, KeyListener {
     private long startTime;
     private String highscores;
 
+    /**
+     * Constructor of GUI. Creates and displays the game window.
+     * Initializes game progress variables, calls the methods to build the game environment.
+     *
+     * @throws IOException if error when reading resource images
+     */
     public GUI() throws IOException {
         super("Sokoban");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -66,24 +80,49 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         numberOfMoves = 0;
         startTime = 0;
 
-        player1KeyboardSetting = KeyboardSetting.WASD;
-        player2KeyboardSetting = KeyboardSetting.ARROWS;
-        buildKeyboardMaps();
-
         player1Name = "";
         player2Name = "";
         player1Enabled = false;
         player2Enabled = false;
         highscores = "";
 
+        player1KeyboardSetting = KeyboardSetting.WASD;
+        player2KeyboardSetting = KeyboardSetting.ARROWS;
+        buildKeyboardMaps();
+
         BuildMenu();
         ReadResourceImages();
+        BuildDrawPanel();
+        BuildStatusbar();
 
-        drawPanel = new DrawPanel();
-        add(drawPanel, BorderLayout.CENTER);
-        drawPanel.setSize(640, 640);
-        drawPanel.setVisible(false);
+        updateStatusBar();
+        updateTime();
 
+        setVisible(true);
+    }
+
+    /**
+     * Entry point of the application.
+     * Instantiates the GUI class, and starts timer for refreshing the window for animations.
+     *
+     * @param args not used
+     */
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                final GUI g = new GUI();
+                Timer timer = new Timer(10, e -> g.refreshAnimations());
+                timer.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    /**
+     * Creates elements for the status bar at the bottom of the window.
+     */
+    private void BuildStatusbar() {
         statusPanel = new JPanel();
         statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
         add(statusPanel, BorderLayout.PAGE_END);
@@ -102,25 +141,24 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         statusPanel.add(timeLabel);
         statusPanel.add(Box.createHorizontalGlue());
         statusPanel.add(settingsLabel);
-
-        updateStatusBar();
-        updateTime();
-
-        setVisible(true);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                final GUI g = new GUI();
-                Timer timer = new Timer(10, e -> g.refreshAnimations());
-                timer.start();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+    /**
+     * Creates the main draw area of the game.
+     */
+    private void BuildDrawPanel() {
+        drawPanel = new DrawPanel();
+        add(drawPanel, BorderLayout.CENTER);
+        drawPanel.setSize(640, 640);
+        drawPanel.setVisible(false);
     }
 
+    /**
+     * Reads the picture files that are the elements of a game map.
+     * Creates key-value pairs between field type and image name.
+     *
+     * @throws IOException if error when reading resource images
+     */
     private void ReadResourceImages() throws IOException {
         final BufferedImage crateImage = ImageIO.read(getClass().getResourceAsStream("/crate.png"));
         final BufferedImage groundImage = ImageIO.read(getClass().getResourceAsStream("/ground.png"));
@@ -139,6 +177,10 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         imageSize = groundImage.getWidth();
     }
 
+    /**
+     * Builds the structure of the menu bar at the top of the game window.
+     * The Logic or Client classes are instantiated here, if a new game is started.
+     */
     private void BuildMenu() {
         JMenuBar menuBar = new JMenuBar();
 
@@ -231,7 +273,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         menuItem = new JMenuItem("Player 1 keyboard settings");
         menuItem.addActionListener(e -> {
             Object selected = JOptionPane.showInputDialog(this, "Player 1 (local)",
-                    "Player 1 keyboard settings", JOptionPane.DEFAULT_OPTION, null, KeyboardSetting.values(), player1KeyboardSetting);
+                    "Player 1 keyboard settings", JOptionPane.PLAIN_MESSAGE, null, KeyboardSetting.values(), player1KeyboardSetting);
             if (selected != null) {
                 KeyboardSetting s = KeyboardSetting.valueOf(selected.toString());
                 if (s != player2KeyboardSetting) {
@@ -247,7 +289,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         menuItem = new JMenuItem("Player 2 keyboard settings");
         menuItem.addActionListener(e -> {
             Object selected = JOptionPane.showInputDialog(this, "Player 2 (local multiplayer)",
-                    "Player 2 keyboard settings", JOptionPane.DEFAULT_OPTION, null, KeyboardSetting.values(), player2KeyboardSetting);
+                    "Player 2 keyboard settings", JOptionPane.PLAIN_MESSAGE, null, KeyboardSetting.values(), player2KeyboardSetting);
             if (selected != null) {
                 KeyboardSetting s = KeyboardSetting.valueOf(selected.toString());
                 if (s != player1KeyboardSetting) {
@@ -269,6 +311,11 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         setJMenuBar(menuBar);
     }
 
+    /**
+     * Opens a file chooser window, used for selecting a game map.
+     *
+     * @return Path of selected file if OK is pressed, empty string if cancel is pressed.
+     */
     private String openMapDialog() {
         final JFileChooser fileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
 
@@ -288,12 +335,18 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         }
     }
 
+    /**
+     * Updates the game status, number of moves, and keyboard settings info in the status bar.
+     */
     private void updateStatusBar() {
         statusLabel.setText("Status: " + connectionStatus + ", moves: " + numberOfMoves);
         settingsLabel.setText("Player 1: " + player1KeyboardSetting.toString() + ", Player 2: " + player2KeyboardSetting.toString());
         repaint();
     }
 
+    /**
+     * Updates the elapsed time info in the status bar.
+     */
     private void updateTime() {
         long elapsed = System.currentTimeMillis() - startTime;
         long second = (elapsed / 1000) % 60;
@@ -309,6 +362,9 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         timeLabel.setText("Elapsed time: " + time);
     }
 
+    /**
+     * Creates key-value pair relation between pressed key and caused player movement.
+     */
     private void buildKeyboardMaps() {
         Map<Integer, Move> keymapWASD = new HashMap<>();
         keymapWASD.put(KeyEvent.VK_W, Move.UP);
@@ -334,10 +390,20 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         keyboardMaps.put(KeyboardSetting.ARROWS, keymapARROWS);
     }
 
+    /**
+     * Not used, needed because of the KeyListener interface.
+     * @param e pressed key event
+     */
     @Override
     public void keyTyped(KeyEvent e) {
     }
 
+    /**
+     * If a keypress is catched, this method will be called.
+     * It selects the necessary player movement based on the pressed key, and sends it to the game logic.
+     * Displays error message if there is no game in progress.
+     * @param e pressed key event
+     */
     @Override
     public void keyPressed(KeyEvent e) {
         if (gameInProgress) {
@@ -350,10 +416,20 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         }
     }
 
+    /**
+     * Not used, needed because of the KeyListener interface.
+     * @param e pressed key event
+     */
     @Override
     public void keyReleased(KeyEvent e) {
     }
 
+    /**
+     * This is the communication point with the game logic.
+     * If there is a happening in the game, the logic will notify the GUI using this method.
+     * The GUI will draw the new fields or update the parameters based on the received new gamestate.
+     * @param g new gamestate
+     */
     @Override
     public void onNewGameState(GameState g) {
         switch (g.type) {
@@ -395,6 +471,12 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         }
     }
 
+    /**
+     * This method is called by the timer in the main method, every 10 msec.
+     * If there is an animation in progress, it will calculate the necessary movement of the fields and repaint.
+     * When the movement animation is done, it will notify the game logic using the ICommand interface.
+     * This method also updates the elapsed time label in the status bar.
+     */
     private void refreshAnimations() {
         if (animationInProgress) {
             animationInProgress = false;
@@ -409,18 +491,27 @@ public class GUI extends JFrame implements IGameState, KeyListener {
             }
             repaint();
 
-            //amikor utoljara fut le
+            //when running last time
             if (!animationInProgress) {
                 logic.onCommand(new Command(Command.CommandType.ANIMATION_DONE));
             }
         }
+
         if (gameInProgress) {
             updateTime();
         }
     }
 
+    /**
+     * The possible combinations of player control keys.
+     */
     public enum KeyboardSetting {WASD, IJKL, ARROWS}
 
+    /**
+     * The main graphics area of the game, it will run when repaint is called.
+     * Draws the static fields at their fixed place,
+     * draws the dynamic fields using the delta values caused by a running animation.
+     */
     class DrawPanel extends JPanel {
         @Override
         protected void paintComponent(Graphics g) {
@@ -443,7 +534,12 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         }
     }
 
-    class DynamicFieldAnimation implements Serializable{
+    /**
+     * This class is similar to the DynamicField.
+     * It is needed to convert the actual and delta coordinates stored in
+     * the DynamicField to pixels, because it is needed for the animations.
+     */
+    class DynamicFieldAnimation implements Serializable {
         GameState.FieldType type;
         int x, y;
         int dx, dy;
