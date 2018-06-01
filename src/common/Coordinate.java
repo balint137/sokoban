@@ -1,9 +1,15 @@
 package common;
 
-import static gui.GUI.MAX_MAP_SIZE;
-
 import java.io.Serializable;
 
+import static gui.GUI.MAX_MAP_SIZE;
+
+/**
+ * Class to store 2 dimensional coordinates.
+ * Checks if the coordinate values are in range, based on the game map size.
+ * Implements simple setter, getter, and add methods.
+ * Overrides toString method for debugging purposes.
+ */
 public class Coordinate implements Serializable {
     private int x, y;
 

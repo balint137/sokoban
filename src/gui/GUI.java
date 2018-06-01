@@ -392,6 +392,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
     /**
      * Not used, needed because of the KeyListener interface.
+     *
      * @param e pressed key event
      */
     @Override
@@ -402,6 +403,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
      * If a keypress is catched, this method will be called.
      * It selects the necessary player movement based on the pressed key, and sends it to the game logic.
      * Displays error message if there is no game in progress.
+     *
      * @param e pressed key event
      */
     @Override
@@ -418,6 +420,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
     /**
      * Not used, needed because of the KeyListener interface.
+     *
      * @param e pressed key event
      */
     @Override
@@ -428,6 +431,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
      * This is the communication point with the game logic.
      * If there is a happening in the game, the logic will notify the GUI using this method.
      * The GUI will draw the new fields or update the parameters based on the received new gamestate.
+     *
      * @param g new gamestate
      */
     @Override
@@ -505,7 +509,9 @@ public class GUI extends JFrame implements IGameState, KeyListener {
     /**
      * The possible combinations of player control keys.
      */
-    public enum KeyboardSetting {WASD, IJKL, ARROWS}
+    public enum KeyboardSetting {
+        WASD, IJKL, ARROWS
+    }
 
     /**
      * The main graphics area of the game, it will run when repaint is called.

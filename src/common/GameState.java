@@ -3,9 +3,15 @@ package common;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * This class is used for notifying the GUI about changes in the map, player positions, game phase, etc.
+ * The static (ground, wall, target) and the movable (player, crate) fields are stored separately.
+ * The number of movements is the summary of the two players' moves.
+ * The phase indicates victory or defeat when the game is finished.
+ */
 public class GameState implements Serializable {
     public GameStateType type;
-    public FieldType[][] staticFields; //1. index: oszlop, 2. index: sor
+    public FieldType[][] staticFields;
     public ArrayList<DynamicField> dynamicFields;
     public int numberOfMovements;
     public GamePhase phase;
