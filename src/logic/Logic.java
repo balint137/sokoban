@@ -13,10 +13,10 @@ import java.nio.charset.Charset;
 
 import static gui.GUI.MAX_MAP_SIZE;
 /**
- * 
+ *
  * @author Baksa Domonkos
  * The class for the game logic
- * ICommand is an interface to get information from the GUI. 
+ * ICommand is an interface to get information from the GUI.
  */
 public class Logic implements ICommand {
     private IGameState g;
@@ -40,7 +40,7 @@ public class Logic implements ICommand {
     private String name1;
     private String name2;
 /**
- * Constructor for the game logic. It loads the layout of the map 
+ * Constructor for the game logic. It loads the layout of the map
  * from a .txt file and sends it to all connected GUIs.
  * @param gui Instance of the GUI on the same machine.
  * @param mapFilePath Path to the file containing the map
@@ -170,16 +170,16 @@ public class Logic implements ICommand {
                     resolveDeltas();
                     if (checkForVictory()) {
                         finishTime = System.currentTimeMillis() - startTime;
-                        g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.WIN));
                         if (network) {
                             s.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.WIN));
                         }
+                        g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.WIN));
                     }
                     if (checkForLoss()) {
-                        g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.LOSE));
                         if (network) {
                             s.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.LOSE));
                         }
+                        g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.LOSE));
                     }
                 }
     			break;
@@ -345,7 +345,7 @@ public class Logic implements ICommand {
     	return -1;
     }
 /**
- * Clear deltas responsible for animations. Called, when the GUI finished animating the movement. 
+ * Clear deltas responsible for animations. Called, when the GUI finished animating the movement.
  */
     private void resolveDeltas() {
     	for (DynamicField df : players) {
