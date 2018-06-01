@@ -23,7 +23,6 @@ public class Logic implements ICommand {
     private ArrayList<DynamicField> crates;
     private ArrayList<DynamicField> players;
     private ArrayList<DynamicField> mapDynamic;
-
     private ArrayList<Command> newCommands;
     private ArrayList<Command> commandsToExecute;
 
@@ -138,24 +137,24 @@ public class Logic implements ICommand {
     	    	}
     			break;
     		case ANIMATION_DONE:
-    			if (animationInProgress) {
-        			mapDynamic.clear();
-        		 	animationInProgress = false;
-        	    	resolveDeltas();
-        		 	if(checkForVictory()) {
-        		 		finishTime = System.currentTimeMillis() - startTime;
-        		 		g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.WIN));
-        		 		if(network) {
-        		 			s.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.WIN));
-        		 		}
-        		 	}
-        		 	if(checkForLoss()) {
-        		 		g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.LOSE));
-        		 		if(network) {
-        		 			s.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.LOSE));
-        		 		}
-        		 	}
-    			}
+                if (animationInProgress) {
+                    mapDynamic.clear();
+                    animationInProgress = false;
+                    resolveDeltas();
+                    if (checkForVictory()) {
+                        finishTime = System.currentTimeMillis() - startTime;
+                        g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.WIN));
+                        if (network) {
+                            s.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.WIN));
+                        }
+                    }
+                    if (checkForLoss()) {
+                        g.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.LOSE));
+                        if (network) {
+                            s.onNewGameState(new GameState(GameState.GameStateType.PHASE_UPDATE, GameState.GamePhase.LOSE));
+                        }
+                    }
+                }
     			break;
     		}
     	}
@@ -239,9 +238,7 @@ public class Logic implements ICommand {
 
 		g.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, mapDynamic));
 		if(network) {
-    		ArrayList<DynamicField> mapDynamic2 = new ArrayList<>();
-			mapDynamic2.addAll(players);
-			s.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, mapDynamic2));
+			s.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, mapDynamic));
  		}
     }
 
@@ -253,21 +250,21 @@ public class Logic implements ICommand {
 			crateIndex = findCrateIndex(players.get(playerIndex).actual, dir);
 			crates.set(crateIndex, new DynamicField(FieldType.CRATE, crates.get(crateIndex).actual, dir));
 			numberOfSteps++;
-			return;
+			break;
 		case TARGET:
 			players.set(playerIndex, new DynamicField(players.get(playerIndex).type, players.get(playerIndex).actual, dir));
 			crateIndex = findCrateIndex(players.get(playerIndex).actual, dir);
 			crates.set(crateIndex, new DynamicField(FieldType.CRATE, crates.get(crateIndex).actual, dir));
 			numberOfSteps++;
-			return;
+			break;
 		case CRATE:
-    		return;
+    		break;
 		case PLAYER1:
-    		return;
+    		break;
     	case PLAYER2:
-    		return;
+    		break;
     	case WALL:
-    		return;
+    		break;
 		}
     }
 
