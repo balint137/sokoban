@@ -1,7 +1,7 @@
 package gui;
 
 import common.*;
-import common.Command.KeyboardSetting;
+import common.Command.Move;
 import common.GameState.FieldType;
 import logic.Logic;
 import network.Client;
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 public class GUI extends JFrame implements IGameState, KeyListener {
@@ -37,6 +38,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
     private JLabel statusLabel;
     private JLabel timeLabel;
     private JLabel settingsLabel;
+    private Map<KeyboardSetting, Map<Integer, Move>> keyboardMaps;
     private KeyboardSetting player1KeyboardSetting;
     private KeyboardSetting player2KeyboardSetting;
     private String player1Name;
@@ -64,6 +66,8 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
         player1KeyboardSetting = KeyboardSetting.WASD;
         player2KeyboardSetting = KeyboardSetting.ARROWS;
+        buildKeyboardMaps();
+
         player1Name = "";
         player2Name = "";
         highscores = "";
@@ -155,7 +159,6 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                     player2Name = JOptionPane.showInputDialog("Player 2 name:");
                 }
                 this.logic = new Logic(this, path, true, player1Name, player2Name, startTime);
-                logic.onCommand(new Command(Command.CommandType.KEY_MAP, player1KeyboardSetting, player2KeyboardSetting));
                 drawPanel.setVisible(true);
                 gameInProgress = true;
                 startTime = System.currentTimeMillis();
@@ -173,7 +176,6 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                     player1Name = JOptionPane.showInputDialog("Player 1 name:");
                 }
                 this.logic = new Logic(this, path, false, player1Name, player2Name, startTime);
-                logic.onCommand(new Command(Command.CommandType.KEY_MAP, player1KeyboardSetting, player2KeyboardSetting));
                 drawPanel.setVisible(true);
                 gameInProgress = true;
                 startTime = System.currentTimeMillis();
@@ -192,7 +194,6 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                     player2Name = JOptionPane.showInputDialog("Player 2 name:");
                 }
                 this.logic = new Logic(this, path, false, player1Name, player2Name, startTime);
-                logic.onCommand(new Command(Command.CommandType.KEY_MAP, player1KeyboardSetting, player2KeyboardSetting));
                 drawPanel.setVisible(true);
                 gameInProgress = true;
                 startTime = System.currentTimeMillis();
@@ -213,9 +214,6 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 KeyboardSetting s = KeyboardSetting.valueOf(selected.toString());
                 if (s != player2KeyboardSetting) {
                     player1KeyboardSetting = s;
-                    if (gameInProgress) {
-                        logic.onCommand(new Command(Command.CommandType.KEY_MAP, player1KeyboardSetting, null));
-                    }
                     updateStatusBar();
                 } else {
                     JOptionPane.showMessageDialog(this, "Already selected for Player 2", "Error", JOptionPane.ERROR_MESSAGE);
@@ -232,9 +230,6 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 KeyboardSetting s = KeyboardSetting.valueOf(selected.toString());
                 if (s != player1KeyboardSetting) {
                     player2KeyboardSetting = s;
-                    if (gameInProgress) {
-                        logic.onCommand(new Command(Command.CommandType.KEY_MAP, null, player2KeyboardSetting));
-                    }
                     updateStatusBar();
                 } else {
                     JOptionPane.showMessageDialog(this, "Already selected for Player 1", "Error", JOptionPane.ERROR_MESSAGE);
@@ -295,6 +290,31 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         timeLabel.setText("Elapsed time: " + time);
     }
 
+    private void buildKeyboardMaps() {
+        Map<Integer, Move> keymapWASD = new HashMap<>();
+        keymapWASD.put(KeyEvent.VK_W, Move.UP);
+        keymapWASD.put(KeyEvent.VK_A, Move.LEFT);
+        keymapWASD.put(KeyEvent.VK_S, Move.DOWN);
+        keymapWASD.put(KeyEvent.VK_D, Move.RIGHT);
+
+        Map<Integer, Move> keymapIJKL = new HashMap<>();
+        keymapIJKL.put(KeyEvent.VK_I, Move.UP);
+        keymapIJKL.put(KeyEvent.VK_J, Move.LEFT);
+        keymapIJKL.put(KeyEvent.VK_K, Move.DOWN);
+        keymapIJKL.put(KeyEvent.VK_L, Move.RIGHT);
+
+        Map<Integer, Move> keymapARROWS = new HashMap<>();
+        keymapARROWS.put(KeyEvent.VK_UP, Move.UP);
+        keymapARROWS.put(KeyEvent.VK_LEFT, Move.LEFT);
+        keymapARROWS.put(KeyEvent.VK_DOWN, Move.DOWN);
+        keymapARROWS.put(KeyEvent.VK_RIGHT, Move.RIGHT);
+
+        keyboardMaps = new EnumMap<>(KeyboardSetting.class);
+        keyboardMaps.put(KeyboardSetting.WASD, keymapWASD);
+        keyboardMaps.put(KeyboardSetting.IJKL, keymapIJKL);
+        keyboardMaps.put(KeyboardSetting.ARROWS, keymapARROWS);
+    }
+
     @Override
     public void keyTyped(KeyEvent e) {
     }
@@ -302,7 +322,9 @@ public class GUI extends JFrame implements IGameState, KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         if (gameInProgress) {
-            logic.onCommand(new Command(Command.CommandType.KEY_PRESSED, e.getKeyCode()));
+            logic.onCommand(new Command(Command.CommandType.KEY_PRESSED,
+                    keyboardMaps.get(player1KeyboardSetting).get(e.getKeyCode()),
+                    keyboardMaps.get(player2KeyboardSetting).get(e.getKeyCode())));
         } else {
             JOptionPane.showMessageDialog(this, "Please start a new game!",
                     "End of game", JOptionPane.WARNING_MESSAGE);
@@ -372,6 +394,8 @@ public class GUI extends JFrame implements IGameState, KeyListener {
             updateTime();
         }
     }
+
+    public enum KeyboardSetting {WASD, IJKL, ARROWS}
 
     class DrawPanel extends JPanel {
         @Override
