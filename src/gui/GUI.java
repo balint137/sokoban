@@ -41,6 +41,8 @@ public class GUI extends JFrame implements IGameState, KeyListener {
     private Map<KeyboardSetting, Map<Integer, Move>> keyboardMaps;
     private KeyboardSetting player1KeyboardSetting;
     private KeyboardSetting player2KeyboardSetting;
+    private boolean player1Enabled;
+    private boolean player2Enabled;
     private String player1Name;
     private String player2Name;
     private long startTime;
@@ -70,6 +72,8 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
         player1Name = "";
         player2Name = "";
+        player1Enabled = false;
+        player2Enabled = false;
         highscores = "";
 
         BuildMenu();
@@ -144,6 +148,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         menuItem.addActionListener(e -> {
             String ip = JOptionPane.showInputDialog("Please provide the server IP address");
             this.logic = new Client(this, ip);
+            player2Enabled = true;
             drawPanel.setVisible(true);
             gameInProgress = true;
             startTime = System.currentTimeMillis();
@@ -159,6 +164,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                     player2Name = JOptionPane.showInputDialog("Player 2 name:");
                 }
                 this.logic = new Logic(this, path, true, player1Name, player2Name, startTime);
+                player1Enabled = true;
                 drawPanel.setVisible(true);
                 gameInProgress = true;
                 startTime = System.currentTimeMillis();
@@ -176,6 +182,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                     player1Name = JOptionPane.showInputDialog("Player 1 name:");
                 }
                 this.logic = new Logic(this, path, false, player1Name, player2Name, startTime);
+                player1Enabled = true;
                 drawPanel.setVisible(true);
                 gameInProgress = true;
                 startTime = System.currentTimeMillis();
@@ -194,6 +201,8 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                     player2Name = JOptionPane.showInputDialog("Player 2 name:");
                 }
                 this.logic = new Logic(this, path, false, player1Name, player2Name, startTime);
+                player1Enabled = true;
+                player2Enabled = true;
                 drawPanel.setVisible(true);
                 gameInProgress = true;
                 startTime = System.currentTimeMillis();
@@ -319,8 +328,8 @@ public class GUI extends JFrame implements IGameState, KeyListener {
     public void keyPressed(KeyEvent e) {
         if (gameInProgress) {
             logic.onCommand(new Command(Command.CommandType.KEY_PRESSED,
-                    keyboardMaps.get(player1KeyboardSetting).get(e.getKeyCode()),
-                    keyboardMaps.get(player2KeyboardSetting).get(e.getKeyCode())));
+                    player1Enabled ? keyboardMaps.get(player1KeyboardSetting).get(e.getKeyCode()) : null,
+                    player2Enabled ? keyboardMaps.get(player2KeyboardSetting).get(e.getKeyCode()) : null));
         } else {
             JOptionPane.showMessageDialog(this, "Please start a new game!",
                     "End of game", JOptionPane.WARNING_MESSAGE);
@@ -363,6 +372,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 }
                 break;
             case HIGHSCORES:
+                highscores = g.highscores;
                 break;
         }
     }
