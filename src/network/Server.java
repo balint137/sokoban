@@ -12,12 +12,32 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * The server class.
+ * IGameState is an interface to get information from the logic.
+ *
+ */
+
 public class Server implements IGameState {
+    /**
+	 * ICommand is an interface that sends command information to the logic.
+	 * We need a server and a client socket for the network communication. 
+	 * The object in/outputstream reads/writes information between the socket and the server.
+	 */
     private ICommand l;
     private ServerSocket serverSocket = null;
     private Socket clientSocket = null;
     private ObjectOutputStream out = null;
     private ObjectInputStream in = null;
+    
+    /**
+     * The server constructor.
+     * It creates a server socket on port nr. 10007 then waits for the client to connect.
+     * Then it creates the in/outpustream for the client socket.
+     * It also creates a logic instance l for the communication interface with the logic.
+     * Finally it creates the receiver thread and starts it.
+     * @param logic
+     */
 
     public Server(Logic logic) {
         l = logic;
@@ -52,6 +72,10 @@ public class Server implements IGameState {
         }
     }
 
+    /**
+     * This function closes the in/outputstreams and sockets.
+     */
+    
     void disconnect() {
         try {
             if (out != null)
@@ -68,11 +92,24 @@ public class Server implements IGameState {
         }
     }
 
+    /**
+     * When the logic calls onNewGameState with a GameState parameter, 
+     * this interface sends the new gamestate to the client.
+     * 
+     */
+    
     @Override
     public void onNewGameState(GameState g) {
         send(g);
     }
 
+    /**
+     * The function that the gamestate is sent with.
+     * It writes the GameState object g to the client's outputstream.
+     * @param g
+     */
+    
+    
     private void send(GameState g) {
         if (out == null)
             return;
@@ -89,6 +126,12 @@ public class Server implements IGameState {
         }
     }
 
+    /**
+     * The ReceiverThread is reading the clientSocket's inputstream and when it 
+     * receives the object it sends it forward to the logic through the onCommand interface.
+     *
+     */
+    
     class ReceiverThread implements Runnable {
         public void run() {
             try {
