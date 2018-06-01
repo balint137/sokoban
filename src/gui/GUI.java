@@ -148,6 +148,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         menuItem.addActionListener(e -> {
             String ip = JOptionPane.showInputDialog("Please provide the server IP address");
             this.logic = new Client(this, ip);
+            player1Enabled = false;
             player2Enabled = true;
             drawPanel.setVisible(true);
             gameInProgress = true;
@@ -165,6 +166,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 }
                 this.logic = new Logic(this, path, true, player1Name, player2Name, startTime);
                 player1Enabled = true;
+                player2Enabled = false;
                 drawPanel.setVisible(true);
                 gameInProgress = true;
                 startTime = System.currentTimeMillis();
@@ -183,6 +185,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 }
                 this.logic = new Logic(this, path, false, player1Name, player2Name, startTime);
                 player1Enabled = true;
+                player2Enabled = false;
                 drawPanel.setVisible(true);
                 gameInProgress = true;
                 startTime = System.currentTimeMillis();
