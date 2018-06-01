@@ -78,6 +78,7 @@ public class Server implements IGameState {
             return;
         try {
             System.out.println("Sending gamestate to client: " + g.type.toString());
+            out.reset();
             out.writeObject(g);
             System.out.println("Object write done.");
             out.flush();
