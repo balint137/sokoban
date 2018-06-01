@@ -12,7 +12,12 @@ import java.util.*;
 import java.nio.charset.Charset;
 
 import static gui.GUI.MAX_MAP_SIZE;
-
+/**
+ * 
+ * @author Baksa Domonkos
+ * The class for the game logic
+ * ICommand is an interface to get information from the GUI. 
+ */
 public class Logic implements ICommand {
     private IGameState g;
     private IGameState s;
@@ -34,7 +39,16 @@ public class Logic implements ICommand {
     private int minSteps;
     private String name1;
     private String name2;
-
+/**
+ * Constructor for the game logic. It loads the layout of the map 
+ * from a .txt file and sends it to all connected GUIs.
+ * @param gui Instance of the GUI on the same machine.
+ * @param mapFilePath Path to the file containing the map
+ * @param network Network or local game
+ * @param name1	Name of the first player
+ * @param name2 Name of the second player
+ * @param startTime Time at the start of the game used for the highscore
+ */
     public Logic(GUI gui, String mapFilePath, boolean network, String name1, String name2, long startTime){
 
         newCommands = new ArrayList<>();
@@ -73,13 +87,21 @@ public class Logic implements ICommand {
 			e.printStackTrace();
 		}
     }
-
+/**
+ * Function to call through the implemented interface
+ */
     @Override
     public void onCommand(Command c) {
     	newCommands.add(c);
     	executeCommands();
     }
-
+/**
+ * Reads .txt file, iterates through the characters in it, and assigns different
+ * map blocks to each. Static blocks are stored in an array (array indices are coordinates),
+ * dynamic blocks are stored in an ArrayList.
+ * @param filename Path to the file
+ * @throws IOException
+ */
     private void loadMap(String filename) throws IOException {
     	for (FieldType[] col : this.mapStatic) {
             Arrays.fill(col, FieldType.GROUND);
@@ -125,7 +147,12 @@ public class Logic implements ICommand {
         	mapDynamic.addAll(crates);
         }
     }
-
+/**
+ * Function to call when a new command arrives. Iterates through the ArrayList
+ * of commands (ideally storing only one element), and acts accordingly.
+ * If the command is KEY_PRESSED, tries to move the appropriate player,
+ * if it is ANIMATION_DONE, resolves events connected to movement (checks win-lose conditions, clears variables used for movement)
+ */
     private void executeCommands() {
     	commandsToExecute.addAll(newCommands);
     	newCommands.clear();
@@ -160,7 +187,10 @@ public class Logic implements ICommand {
     	}
     	commandsToExecute.clear();
     }
-
+/**
+ * Function to call if the issued command is KEY_PRESSED.
+ * @param c Movement command to execute
+ */
     private void processKeyPress(Command c) {
         if (c.movePlayer1 != null) {
             switch (c.movePlayer1) {
@@ -200,7 +230,13 @@ public class Logic implements ICommand {
             }
         }
     }
-
+/**
+ * Function which moves the player if possible. Checks the next block in the
+ * direction of the movement. If it is free, moves there. If it is a wall or a player,
+ * does not move. If it is a crate, it calls moveCrate().
+ * @param player Player to move
+ * @param dir Direction to move
+ */
     private void move(FieldType player, Coordinate dir) {
     	int playerIndex = 0;
     	for (int i=0;i<players.size(); i++) {
@@ -241,7 +277,12 @@ public class Logic implements ICommand {
 			s.onNewGameState(new GameState(GameState.GameStateType.DYNAMIC_FIELDS, mapDynamic));
  		}
     }
-
+/**
+ * Function to call if the next block in the movement's direction is a crate.
+ * Checks if the block next to the crate is free, and if so, moves both crate and player.
+ * @param playerIndex Index of the player in the players ArrayList
+ * @param dir Direction of movement
+ */
     private void moveCrate(int playerIndex, Coordinate dir) {
 		int crateIndex;
 		switch(blockType(players.get(playerIndex).actual, new Coordinate(dir.getX()*2, dir.getY()*2))) {
@@ -267,7 +308,13 @@ public class Logic implements ICommand {
     		break;
 		}
     }
-
+/**
+ * Finds the FieldType of a block at a distance from a player.
+ * @param c Player's coordinates
+ * @param difference X and Y distance of block from the player
+ * @return Dynamic block type if there is a player or crate at that position,
+ * 		   otherwise return static block type at that position.
+ */
     private FieldType blockType (Coordinate c, Coordinate difference) {
     	for (DynamicField mapElement : crates) {
     		if (mapElement.actual.getX() == (c.getX() + difference.getX()) && mapElement.actual.getY() == (c.getY() + difference.getY())) {
@@ -281,7 +328,12 @@ public class Logic implements ICommand {
     	}
     	return mapStatic[c.getX()+difference.getX()][c.getY()+difference.getY()];
     }
-
+/**
+ * Find index of a crate instance in the ArrayList containing them
+ * @param c Coordinates of the player
+ * @param difference  X and Y distance of crate from the player
+ * @return Index of the crate at given position in the ArrayList
+ */
     private int findCrateIndex (Coordinate c, Coordinate difference) {
     	int i = 0;
     	for (DynamicField crate : crates) {
@@ -292,7 +344,9 @@ public class Logic implements ICommand {
     	}
     	return -1;
     }
-
+/**
+ * Clear deltas responsible for animations. Called, when the GUI finished animating the movement. 
+ */
     private void resolveDeltas() {
     	for (DynamicField df : players) {
     		df.actual.add(df.delta);
@@ -303,7 +357,11 @@ public class Logic implements ICommand {
     		df.delta = new Coordinate (0,0);
     	}
     }
-
+/**
+ * Check win condition.
+ * @return True if all crates are over a TARGET block.
+ * 		   False else.
+ */
     private boolean checkForVictory() {
     	for (DynamicField crate : crates) {
     		if(mapStatic[crate.actual.getX()][crate.actual.getY()] != FieldType.TARGET) {
@@ -312,7 +370,11 @@ public class Logic implements ICommand {
     	}
     	return true;
     }
-
+/**
+ * Check lose condition.
+ * @return	True if a crate is in a corner (made up of walls or crates)
+ * 			False else.
+ */
     private boolean checkForLoss() {
     	for (DynamicField crate : crates) {
     		FieldType above, below, right, left;
