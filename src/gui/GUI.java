@@ -147,7 +147,9 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         JMenuItem menuItem = new JMenuItem("Client");
         menuItem.addActionListener(e -> {
             String ip = JOptionPane.showInputDialog("Please provide the server IP address");
-            this.logic = new Client(this, ip);
+            logic = new Client(this, ip);
+            connectionStatus = "Game in progress";
+            updateStatusBar();
             player1Enabled = false;
             player2Enabled = true;
             drawPanel.setVisible(true);
@@ -160,11 +162,15 @@ public class GUI extends JFrame implements IGameState, KeyListener {
         menuItem.addActionListener(e -> {
             String path = openMapDialog();
             if (!path.isEmpty() && path.contains("_multi")) {
+                connectionStatus = "Waiting for client";
+                updateStatusBar();
                 if (player1Name.isEmpty() || player2Name.isEmpty()) {
                     player1Name = JOptionPane.showInputDialog("Player 1 name:");
                     player2Name = JOptionPane.showInputDialog("Player 2 name:");
                 }
-                this.logic = new Logic(this, path, true, player1Name, player2Name, startTime);
+                logic = new Logic(this, path, true, player1Name, player2Name, startTime);
+                connectionStatus = "Game in progress";
+                updateStatusBar();
                 player1Enabled = true;
                 player2Enabled = false;
                 drawPanel.setVisible(true);
@@ -183,7 +189,9 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 if (player1Name.isEmpty()) {
                     player1Name = JOptionPane.showInputDialog("Player 1 name:");
                 }
-                this.logic = new Logic(this, path, false, player1Name, player2Name, startTime);
+                logic = new Logic(this, path, false, player1Name, player2Name, startTime);
+                connectionStatus = "Game in progress";
+                updateStatusBar();
                 player1Enabled = true;
                 player2Enabled = false;
                 drawPanel.setVisible(true);
@@ -203,7 +211,9 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                     player1Name = JOptionPane.showInputDialog("Player 1 name:");
                     player2Name = JOptionPane.showInputDialog("Player 2 name:");
                 }
-                this.logic = new Logic(this, path, false, player1Name, player2Name, startTime);
+                logic = new Logic(this, path, false, player1Name, player2Name, startTime);
+                connectionStatus = "Game in progress";
+                updateStatusBar();
                 player1Enabled = true;
                 player2Enabled = true;
                 drawPanel.setVisible(true);
@@ -281,6 +291,7 @@ public class GUI extends JFrame implements IGameState, KeyListener {
     private void updateStatusBar() {
         statusLabel.setText("Status: " + connectionStatus + ", moves: " + numberOfMoves);
         settingsLabel.setText("Player 1: " + player1KeyboardSetting.toString() + ", Player 2: " + player2KeyboardSetting.toString());
+        repaint();
     }
 
     private void updateTime() {
@@ -364,11 +375,15 @@ public class GUI extends JFrame implements IGameState, KeyListener {
                 switch (g.phase) {
                     case WIN:
                         gameInProgress = false;
+                        connectionStatus = "Game finished";
+                        updateStatusBar();
                         JOptionPane.showMessageDialog(this, "Congratulations, you won!",
                                 "Victory", JOptionPane.INFORMATION_MESSAGE);
                         break;
                     case LOSE:
                         gameInProgress = false;
+                        connectionStatus = "Game finished";
+                        updateStatusBar();
                         JOptionPane.showMessageDialog(this, "You lost!",
                                 "Game over", JOptionPane.WARNING_MESSAGE);
                         break;
