@@ -6,7 +6,6 @@ public class Command implements Serializable {
     public CommandType command;
     public Move movePlayer1;
     public Move movePlayer2;
-    public boolean fromNetwork = false;
 
     public Command(CommandType command) {
         this.command = command;
