@@ -244,10 +244,6 @@ public class GUI extends JFrame implements IGameState, KeyListener {
 
         menuBar.add(menu);
 
-        menuItem = new JMenuItem("Exit");
-        menuItem.addActionListener(e -> System.exit(0));
-        menuBar.add(menuItem);
-
         setJMenuBar(menuBar);
     }
 
